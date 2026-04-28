@@ -1,4 +1,4 @@
-package com.project.travel.user.dto;
+package com.project.travel.user.dto.response;
 
 import com.project.travel.user.entity.User;
 import lombok.Builder;
@@ -8,14 +8,14 @@ import java.util.UUID;
 
 @Getter
 @Builder
-public class UserResponseDto {
+public class UserSignUpResponseDto {
     private Long userNo;
     private UUID userUUID;
     private String email;
     private String userName;
 
-    public static UserResponseDto from(User user) {
-        return UserResponseDto.builder()
+    public static UserSignUpResponseDto from(User user) {
+        return UserSignUpResponseDto.builder()
                 .userNo(user.getUserNo())
                 .userUUID(user.getUserUUID())
                 .email(user.getEmail())
