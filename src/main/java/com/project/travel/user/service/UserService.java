@@ -16,11 +16,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final EmailService emailService;
 
     public UserSignUpResponseDto signUp(UserSignUpRequestDto requestDto) {
         if (!requestDto.getPassword().equals(requestDto.getConfirmPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_MISMATCH);
         }
+        emailService.checkVerifiedEmail(requestDto.getEmail());
+
         if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
@@ -34,6 +37,7 @@ public class UserService {
                 .password(encodedPassword)
                 .build();
         userRepository.save(user);
+        emailService.removeVerifiedEmail(requestDto.getEmail());
         return UserSignUpResponseDto.from(user);
     }
 }

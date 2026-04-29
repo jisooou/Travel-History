@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @Builder
 public class UserSignUpResponseDto {
-    private Long userNo;
+    private Integer userNo;
     private UUID userUUID;
     private String email;
     private String userName;
