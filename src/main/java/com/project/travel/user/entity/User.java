@@ -16,9 +16,9 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userNo;
+    private Integer userNo;
 
-    @Column(nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    @Column(name = "USER_UUID", nullable = false, unique = true, columnDefinition = "BINARY(16)")
     @Convert(converter = UUIDConverter.class)
     private UUID userUUID;
 
@@ -54,11 +54,11 @@ public class User {
             this.createdAt = LocalDateTime.now();
         }
         if (this.isActive == null) {
-            this.isActive = ActiveStatus.Y;
+            this.isActive = ActiveStatus.ACTIVE;
         }
     }
 
     public enum ActiveStatus {
-        Y, N
+        ACTIVE, INACTIVE
     }
 }
