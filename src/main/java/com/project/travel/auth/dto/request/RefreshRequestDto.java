@@ -1,4 +1,4 @@
-package com.project.travel.user.dto.request;
+package com.project.travel.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
