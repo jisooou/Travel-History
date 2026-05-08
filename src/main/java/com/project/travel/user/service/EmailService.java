@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 
@@ -23,6 +24,7 @@ public class EmailService {
     private final static String EMAIL_CODE_PREFIX = "email:code:";
     private final static String VERIFIED_PREFIX = "email:verified:";
 
+    @Transactional
     public void sendEmailCode(@Email @NotBlank String email) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -36,6 +38,7 @@ public class EmailService {
         sendEmail(email, code);
     }
 
+    @Transactional
     public void verifyEmail(@Email @NotBlank String email, @NotBlank String code) {
         String savedCode = redisTemplate.opsForValue().get(EMAIL_CODE_PREFIX + email);
         if (savedCode == null) {

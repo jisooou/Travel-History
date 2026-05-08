@@ -9,6 +9,7 @@ import com.project.travel.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailService emailService;
 
+    @Transactional
     public UserSignUpResponseDto signUp(UserSignUpRequestDto requestDto) {
         if (!requestDto.getPassword().equals(requestDto.getConfirmPassword())) {
             throw new CustomException(ErrorCode.PASSWORD_MISMATCH);

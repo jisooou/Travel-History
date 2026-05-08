@@ -7,6 +7,7 @@ import com.project.travel.user.dto.request.UserSignUpRequestDto;
 import com.project.travel.user.dto.response.UserSignUpResponseDto;
 import com.project.travel.user.service.EmailService;
 import com.project.travel.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,22 +22,19 @@ public class UserController {
     private final EmailService emailService;
 
     @PostMapping("/signup/email/send")
-    public ApiResponse<Void> sendEmail(@RequestBody EmailSendRequestDto requestDto) {
-        emailService.sendEmailCode(requestDto.getEmail());
+    public ApiResponse<Void> sendEmail(@Valid @RequestBody EmailSendRequestDto emailSendRequestDto) {
+        emailService.sendEmailCode(emailSendRequestDto.getEmail());
         return ApiResponse.success(null);
     }
 
     @PostMapping("/signup/email/verify")
-    public ApiResponse<Void> verifyEmail(@RequestBody EmailVerifyRequestDto reqeustDto) {
-        emailService.verifyEmail(reqeustDto.getEmail(), reqeustDto.getCode());
+    public ApiResponse<Void> verifyEmail(@Valid @RequestBody EmailVerifyRequestDto emailVerifyRequestDto) {
+        emailService.verifyEmail(emailVerifyRequestDto.getEmail(), emailVerifyRequestDto.getCode());
         return ApiResponse.success(null);
     }
 
     @PostMapping("/signup")
-    public ApiResponse<UserSignUpResponseDto> signUp(@RequestBody UserSignUpRequestDto requestDto) {
-        return ApiResponse.success(userService.signUp(requestDto));
+    public ApiResponse<UserSignUpResponseDto> signUp(@Valid @RequestBody UserSignUpRequestDto userSignUpRequestDto) {
+        return ApiResponse.success(userService.signUp(userSignUpRequestDto));
     }
-
-//    @PostMapping("/login")
-
 }
