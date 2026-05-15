@@ -22,20 +22,20 @@ public class User {
     @Convert(converter = UUIDConverter.class)
     private UUID userUUID;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "EMAIL", nullable = false, unique = true)
     private String email;
 
-    @Column(length = 30, unique = true)
+    @Column(name = "USER_NAME", length = 30, unique = true)
     private String userName;
 
-    @Column(nullable = false)
+    @Column(name = "PASSWORD", nullable = false)
     private String password;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "IS_ACTIVE", nullable = false)
     private ActiveStatus isActive;
 
     @Builder
