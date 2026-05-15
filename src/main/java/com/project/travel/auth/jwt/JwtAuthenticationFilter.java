@@ -1,5 +1,6 @@
 package com.project.travel.auth.jwt;
 
+import com.project.travel.auth.security.CustomUserDetails;
 import com.project.travel.auth.service.TokenRedisService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
@@ -47,11 +48,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 User user = userRepository.findById(userNo)
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+                CustomUserDetails customUserDetails = CustomUserDetails.from(user, authorities);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(
-                                user.getUserNo(),
+                                customUserDetails,
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                                customUserDetails.getAuthorities()
                         );
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             } catch (Exception e) {
