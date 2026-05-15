@@ -1,4 +1,10 @@
 package com.project.travel.schedule.repository;
 
-public interface ScheduleRepository {
+import com.project.travel.schedule.entity.SchedulePlace;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ScheduleRepository extends JpaRepository<SchedulePlace, Integer> {
+    List<SchedulePlace> findByDay_DayNo(Integer dayNo);
 }
