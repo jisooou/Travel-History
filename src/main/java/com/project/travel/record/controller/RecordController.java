@@ -38,7 +38,7 @@ public class RecordController {
         return ApiResponse.success(recordService.getMyRecords(userDetails.getUserNo()));
     }
 
-    //    여행 기록 상세 조회
+    //    여행 기록 상세 조회 (날짜, 일정, todo)
     @GetMapping("/{recordNo}")
     public ApiResponse<RecordDetailResponseDto> getRecordDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
