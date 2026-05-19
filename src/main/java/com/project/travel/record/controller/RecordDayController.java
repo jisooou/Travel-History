@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/record-days")
@@ -28,7 +30,7 @@ public class RecordDayController {
 
     //    특정 여행 기록의 날짜 조회
     @GetMapping("/records/{recordNo}")
-    public ApiResponse<RecordDayResponseDto> getRecordDays(
+    public ApiResponse<List<RecordDayResponseDto>> getRecordDays(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer recordNo
     ) {
