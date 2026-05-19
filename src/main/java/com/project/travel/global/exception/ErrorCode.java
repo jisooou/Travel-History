@@ -19,7 +19,12 @@ public enum ErrorCode {
     WRONG_PASSWORD(400, "A002", "잘못된 비밀번호입니다."),
     EXPIRED_REFRESH_TOKEN(400, "A003", "토큰이 만료되었거나 로그아웃된 사용자입니다."),
     DETECTED_DANGER_REFRESH_TOKEN(400, "A004", "토큰의 재사용이 감지되었습니다. 다시 로그인해 주세요."),
-    LOGOUT_INVALID_TOKEN(400, "A005", "로그아웃된 토큰입니다.");
+    LOGOUT_INVALID_TOKEN(400, "A005", "로그아웃된 토큰입니다."),
+    //    RECORD
+    RECORD_NOT_FOUND(404, "R001", "해당 기록을 찾을 수 없습니다."),
+    RECORD_ACCESS_DENIED(400, "R002", "해당 기록에 접근할 수 없습니다."),
+    RECORD_DAY_NOT_FOUND(400, "R003", "해당 기록 날짜를 찾을 수 없습니다.");
+
 
     private final int status;
     private final String code;
