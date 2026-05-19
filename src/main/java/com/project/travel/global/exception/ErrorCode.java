@@ -23,8 +23,16 @@ public enum ErrorCode {
     //    RECORD
     RECORD_NOT_FOUND(404, "R001", "해당 기록을 찾을 수 없습니다."),
     RECORD_ACCESS_DENIED(400, "R002", "해당 기록에 접근할 수 없습니다."),
-    RECORD_DAY_NOT_FOUND(400, "R003", "해당 기록 날짜를 찾을 수 없습니다.");
-
+    RECORD_DAY_NOT_FOUND(400, "R003", "해당 기록 날짜를 찾을 수 없습니다."),
+    RECORD_DAY_ACCESS_DENIED(400, "R004", "해당 기록 날짜에 접근할 수 없습니다."),
+    //    PLACE
+    PLACE_NOT_FOUND(404, "P001", "해당 장소를 찾을 수 없습니다."),
+    //    SCHEDULE
+    SCHEDULE_NOT_FOUND(404, "S001", "해당 일정을 찾을 수 없습니다."),
+    SCHEDULE_ACCESS_DENIED(400, "S002", "해당 일정에 접근할 수 없습니다."),
+    //    TODO
+    TODO_NOT_FOUND(404, "T001", "해당 투두를 찾을 수 없습니다."),
+    TODO_ACCESS_DENIED(400, "T002", "해당 투두에 접근할 수 없습니다.");
 
     private final int status;
     private final String code;
