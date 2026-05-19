@@ -23,7 +23,6 @@ import java.util.List;
 public class RecordDayService {
     private final RecordDayRepository recordDayRepository;
     private final RecordRepository recordRepository;
-    private final UserRepository userRepository;
 
     @Transactional
     public RecordDayResponseDto createRecordDay(Integer userNo, Integer recordNo, @Valid RecordDayRequestDto requestDto) {
