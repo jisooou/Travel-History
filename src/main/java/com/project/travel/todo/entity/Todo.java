@@ -46,14 +46,14 @@ public class Todo {
     private String todoContent;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TODO_CONTENT", length = 10, nullable = false, comment = "DONE or NOT_DONE")
+    @Column(name = "IS_COMPLETED", length = 10, nullable = false, comment = "DONE or NOT_DONE")
     private CompletedStatus isCompleted;
 
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
     @Builder
-    public void Todo(RecordDay day, User writer, String todoContent, CompletedStatus isCompleted) {
+    public Todo(RecordDay day, User writer, String todoContent, CompletedStatus isCompleted) {
         this.day = day;
         this.writer = writer;
         this.todoContent = todoContent;
@@ -74,4 +74,16 @@ public class Todo {
         DONE,
         NOT_DONE
     }
+
+    //    책임 : Todo content update
+    public void updateContent(String todoContent) {
+        this.todoContent = todoContent;
+    }
+
+    //    책임 : Todo status update
+    public void updateStatus(CompletedStatus status) {
+        this.isCompleted = status;
+    }
+
+
 }
