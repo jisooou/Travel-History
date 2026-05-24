@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_record_map_place",
-                        columnNames = {"RECORD_NO", "MAP_PLACE_ID"}
+                        columnNames = {"RECORD_NO", "MAP_SOURCE", "MAP_PLACE_ID"}
                 )
         },
         indexes = {
