@@ -28,8 +28,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponseDto createSchedule(Integer userNo, Integer dayNo, @Valid ScheduleRequestDto requestDto) {
         RecordDay recordDay = getRecordDay(userNo, dayNo);
-        Place place = placeRepository.findById(requestDto.getPlaceNo())
-                .orElseThrow(() -> new CustomException(ErrorCode.PLACE_NOT_FOUND));
+        Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
 
         SchedulePlace schedulePlace = SchedulePlace.builder()
                 .day(recordDay)
@@ -52,8 +51,9 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponseDto updateScheduleOfDay(Integer userNo, Integer scheduleNo, @Valid ScheduleRequestDto requestDto) {
         SchedulePlace schedulePlace = getMySchedule(userNo, scheduleNo);
-        Place place = placeRepository.findById(requestDto.getPlaceNo())
-                .orElseThrow(() -> new CustomException(ErrorCode.PLACE_NOT_FOUND));
+        RecordDay recordDay = schedulePlace.getDay();
+        Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
+
         schedulePlace.update(requestDto, place);
         return ScheduleResponseDto.from(schedulePlace);
     }
@@ -81,5 +81,14 @@ public class ScheduleService {
             throw new CustomException(ErrorCode.SCHEDULE_ACCESS_DENIED);
         }
         return schedulePlace;
+    }
+
+    private Place checkPlaceInSameRecord(Integer placeNo, RecordDay recordDay) {
+        Place place = placeRepository.findById(placeNo)
+                .orElseThrow(() -> new CustomException(ErrorCode.PLACE_NOT_FOUND));
+        if (!place.getRecord().getRecordNo().equals(recordDay.getRecord().getRecordNo())) {
+            throw new CustomException(ErrorCode.PLACE_ACCESS_DENIED);
+        }
+        return place;
     }
 }
