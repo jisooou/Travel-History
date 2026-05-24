@@ -27,6 +27,7 @@ public enum ErrorCode {
     RECORD_DAY_ACCESS_DENIED(400, "R004", "해당 기록 날짜에 접근할 수 없습니다."),
     //    PLACE
     PLACE_NOT_FOUND(404, "P001", "해당 장소를 찾을 수 없습니다."),
+    PLACE_ACCESS_DENIED(400, "P002", "해당 장소를 넣을 수 없습니다."),
     //    SCHEDULE
     SCHEDULE_NOT_FOUND(404, "S001", "해당 일정을 찾을 수 없습니다."),
     SCHEDULE_ACCESS_DENIED(400, "S002", "해당 일정에 접근할 수 없습니다."),
