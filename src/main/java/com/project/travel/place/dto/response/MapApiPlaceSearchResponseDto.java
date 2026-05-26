@@ -6,7 +6,7 @@ import java.util.List;
 
 //외부 Map API를 활용하는 코드 : Kakao Map API
 @Getter
-public class MapPlaceSearchResponseDto {
+public class MapApiPlaceSearchResponseDto {
     private List<Document> documents;
 
     @Getter
