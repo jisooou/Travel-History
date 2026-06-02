@@ -26,7 +26,7 @@ public class PlaceService {
 
     @Transactional
     public PlaceResponseDto addPlaceToRecord(Integer userNo, Integer recordNo, @Valid PlaceRequestDto requestDto) {
-        Record record = getMyRecord(recordNo);
+        Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
         Place place = placeRepository
@@ -52,7 +52,7 @@ public class PlaceService {
     }
 
     public List<PlaceResponseDto> getPlaceOfRecord(Integer userNo, Integer recordNo) {
-        getMyRecord(recordNo);
+        getAccessRecord(recordNo);
         collabAuthorityService.checkViewable(recordNo, userNo);
 
         return placeRepository.findByRecord_RecordNo(recordNo)
@@ -63,7 +63,7 @@ public class PlaceService {
 
     @Transactional
     public void deletePlace(Integer userNo, Integer placeNo) {
-        Place place = getMyPlace(placeNo);
+        Place place = getAccessPlace(placeNo);
         Integer recordNo = place.getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -71,12 +71,12 @@ public class PlaceService {
         placeRepository.delete(place);
     }
 
-    private Record getMyRecord(Integer recordNo) {
+    private Record getAccessRecord(Integer recordNo) {
         return recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
     }
 
-    private Place getMyPlace(Integer placeNo) {
+    private Place getAccessPlace(Integer placeNo) {
         return placeRepository.findById(placeNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.PLACE_NOT_FOUND));
     }

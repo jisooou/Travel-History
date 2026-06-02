@@ -59,7 +59,7 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponseDto updateScheduleOfDay(Integer userNo, Integer scheduleNo, @Valid ScheduleRequestDto requestDto) {
-        SchedulePlace schedulePlace = getMySchedule(scheduleNo);
+        SchedulePlace schedulePlace = getAccessSchedule(scheduleNo);
         RecordDay recordDay = schedulePlace.getDay();
         Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
 
@@ -72,7 +72,7 @@ public class ScheduleService {
 
     @Transactional
     public void deleteScheduleOfDay(Integer userNo, Integer scheduleNo) {
-        SchedulePlace schedulePlace = getMySchedule(scheduleNo);
+        SchedulePlace schedulePlace = getAccessSchedule(scheduleNo);
         Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
         collabAuthorityService.checkEditable(recordNo, userNo);
 
@@ -84,7 +84,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
     }
 
-    private SchedulePlace getMySchedule(Integer scheduleNo) {
+    private SchedulePlace getAccessSchedule(Integer scheduleNo) {
         return scheduleRepository.findById(scheduleNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCHEDULE_NOT_FOUND));
     }

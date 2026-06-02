@@ -75,7 +75,7 @@ public class RecordService {
     }
 
     public RecordDetailResponseDto getRecordDetail(Integer userNo, Integer recordNo) {
-        Record record = getActiveRecord(recordNo);
+        Record record = getAccessRecord(recordNo);
 //        OWNER, EDITOR, VIEWR 모두 상세 조회가 가능하다.
         collabAuthorityService.checkViewable(recordNo, userNo);
 
@@ -107,7 +107,7 @@ public class RecordService {
 
     @Transactional
     public RecordResponseDto updateRecord(Integer userNo, Integer recordNo, @Valid RecordRequestDto requestDto) {
-        Record record = getActiveRecord(recordNo);
+        Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
         record.update(requestDto);
@@ -116,14 +116,14 @@ public class RecordService {
 
     @Transactional
     public void deleteRecord(Integer userNo, Integer recordNo) {
-        Record record = getActiveRecord(recordNo);
+        Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkOwner(recordNo, userNo);
 
         record.delete();
     }
 
     //    Owner만 보는 것 X. Editor도 볼 수 있다.
-    private Record getActiveRecord(Integer recordNo) {
+    private Record getAccessRecord(Integer recordNo) {
         return recordRepository.findByRecordNoAndIsDeletedFalse(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
     }

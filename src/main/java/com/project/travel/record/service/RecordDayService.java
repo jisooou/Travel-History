@@ -9,8 +9,6 @@ import com.project.travel.record.entity.Record;
 import com.project.travel.record.entity.RecordDay;
 import com.project.travel.record.repository.RecordDayRepository;
 import com.project.travel.record.repository.RecordRepository;
-import com.project.travel.user.entity.User;
-import com.project.travel.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +26,7 @@ public class RecordDayService {
 
     @Transactional
     public RecordDayResponseDto createRecordDay(Integer userNo, Integer recordNo, @Valid RecordDayRequestDto requestDto) {
-        Record record = getMyRecord(recordNo);
+        Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
         RecordDay recordDay = RecordDay.builder()
@@ -41,7 +39,7 @@ public class RecordDayService {
     }
 
     public List<RecordDayResponseDto> getRecordDays(Integer userNo, Integer recordNo) {
-        getMyRecordDay(recordNo);
+        getAccessRecordDay(recordNo);
         collabAuthorityService.checkViewable(recordNo, userNo);
 
         return recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo)
@@ -52,7 +50,7 @@ public class RecordDayService {
 
     @Transactional
     public RecordDayResponseDto updateRecordDay(Integer userNo, Integer dayNo, @Valid RecordDayRequestDto requestDto) {
-        RecordDay recordDay = getMyRecordDay(dayNo);
+        RecordDay recordDay = getAccessRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -63,7 +61,7 @@ public class RecordDayService {
 
     @Transactional
     public void deleteRecordDay(Integer userNo, Integer dayNo) {
-        RecordDay recordDay = getMyRecordDay(dayNo);
+        RecordDay recordDay = getAccessRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -71,12 +69,12 @@ public class RecordDayService {
         recordDayRepository.delete(recordDay);
     }
 
-    private Record getMyRecord(Integer recordNo) {
+    private Record getAccessRecord(Integer recordNo) {
         return recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
     }
 
-    private RecordDay getMyRecordDay(Integer dayNo) {
+    private RecordDay getAccessRecordDay(Integer dayNo) {
         return recordDayRepository.findById(dayNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
     }

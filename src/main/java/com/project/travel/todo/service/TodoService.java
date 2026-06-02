@@ -65,7 +65,7 @@ public class TodoService {
 
     @Transactional
     public TodoResponseDto updateTodoOfDay(Integer userNo, Integer todoNo, @Valid TodoCreateRequestDto createRequestDto) {
-        Todo todo = getMyTodo(todoNo);
+        Todo todo = getAccessTodo(todoNo);
         Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -76,7 +76,7 @@ public class TodoService {
 
     @Transactional
     public TodoStatusResponseDto updateTodoStatus(Integer userNo, Integer todoNo, @Valid TodoStatusUpdateRequestDto requestDto) {
-        Todo todo = getMyTodo(todoNo);
+        Todo todo = getAccessTodo(todoNo);
         Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -87,7 +87,7 @@ public class TodoService {
 
     @Transactional
     public void deleteTodo(Integer userNo, Integer todoNo) {
-        Todo todo = getMyTodo(todoNo);
+        Todo todo = getAccessTodo(todoNo);
         Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
         collabAuthorityService.checkEditable(recordNo, userNo);
@@ -100,7 +100,7 @@ public class TodoService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
     }
 
-    private Todo getMyTodo(Integer todoNo) {
+    private Todo getAccessTodo(Integer todoNo) {
         return todoRepository.findById(todoNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
     }
