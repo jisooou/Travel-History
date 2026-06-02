@@ -1,5 +1,6 @@
 package com.project.travel.todo.service;
 
+import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.record.entity.RecordDay;
@@ -26,11 +27,15 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final RecordDayRepository recordDayRepository;
     private final UserRepository userRepository;
+    private final CollabAuthorityService collabAuthorityService;
 
     //    날짜에 따라서 Todo를 작성한다.
     @Transactional
     public TodoResponseDto createTodo(Integer userNo, Integer dayNo, @Valid TodoCreateRequestDto createRequestDto) {
-        RecordDay recordDay = getRecordDay(userNo, dayNo);
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
 
         User writer = userRepository.findById(userNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -47,7 +52,10 @@ public class TodoService {
     }
 
     public List<TodoResponseDto> getTodoOfDay(Integer userNo, Integer dayNo) {
-        getRecordDay(userNo, dayNo);
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkViewable(recordNo, userNo);
 
         return todoRepository.findByDay_DayNoOrderByCreatedAtAsc(dayNo)
                 .stream()
@@ -57,41 +65,43 @@ public class TodoService {
 
     @Transactional
     public TodoResponseDto updateTodoOfDay(Integer userNo, Integer todoNo, @Valid TodoCreateRequestDto createRequestDto) {
-        Todo todo = getMyTodo(userNo, todoNo);
+        Todo todo = getMyTodo(todoNo);
+        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         todo.updateContent(createRequestDto.getTodoContent());
         return TodoResponseDto.from(todo);
     }
 
     @Transactional
     public TodoStatusResponseDto updateTodoStatus(Integer userNo, Integer todoNo, @Valid TodoStatusUpdateRequestDto requestDto) {
-        Todo todo = getMyTodo(userNo, todoNo);
+        Todo todo = getMyTodo(todoNo);
+        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         todo.updateStatus(requestDto.getCompletedStatus());
         return TodoStatusResponseDto.from(todo);
     }
 
     @Transactional
     public void deleteTodo(Integer userNo, Integer todoNo) {
-        Todo todo = getMyTodo(userNo, todoNo);
+        Todo todo = getMyTodo(todoNo);
+        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         todoRepository.delete(todo);
     }
 
-    private RecordDay getRecordDay(Integer userNo, Integer dayNo) {
-        RecordDay recordDay = recordDayRepository.findById(dayNo)
+    private RecordDay getRecordDay(Integer dayNo) {
+        return recordDayRepository.findById(dayNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
-
-        if (!recordDay.getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.RECORD_DAY_ACCESS_DENIED);
-        }
-        return recordDay;
     }
 
-    private Todo getMyTodo(Integer userNo, Integer todoNo) {
-        Todo todo = todoRepository.findById(todoNo)
+    private Todo getMyTodo(Integer todoNo) {
+        return todoRepository.findById(todoNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
-
-        if (!todo.getDay().getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.TODO_ACCESS_DENIED);
-        }
-        return todo;
     }
 }

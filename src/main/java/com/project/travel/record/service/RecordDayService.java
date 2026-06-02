@@ -1,5 +1,6 @@
 package com.project.travel.record.service;
 
+import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.record.dto.request.RecordDayRequestDto;
@@ -23,10 +24,13 @@ import java.util.List;
 public class RecordDayService {
     private final RecordDayRepository recordDayRepository;
     private final RecordRepository recordRepository;
+    private final CollabAuthorityService collabAuthorityService;
 
     @Transactional
     public RecordDayResponseDto createRecordDay(Integer userNo, Integer recordNo, @Valid RecordDayRequestDto requestDto) {
-        Record record = getMyRecord(userNo, recordNo);
+        Record record = getMyRecord(recordNo);
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
                 .travelDate(requestDto.getTravelDate())
@@ -37,7 +41,9 @@ public class RecordDayService {
     }
 
     public List<RecordDayResponseDto> getRecordDays(Integer userNo, Integer recordNo) {
-        getMyRecordDay(userNo, recordNo);
+        getMyRecordDay(recordNo);
+        collabAuthorityService.checkViewable(recordNo, userNo);
+
         return recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo)
                 .stream()
                 .map(RecordDayResponseDto::from)
@@ -46,34 +52,33 @@ public class RecordDayService {
 
     @Transactional
     public RecordDayResponseDto updateRecordDay(Integer userNo, Integer dayNo, @Valid RecordDayRequestDto requestDto) {
-        RecordDay recordDay = getMyRecordDay(userNo, dayNo);
+        RecordDay recordDay = getMyRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         recordDay.update(requestDto);
         return RecordDayResponseDto.from(recordDay);
     }
 
     @Transactional
     public void deleteRecordDay(Integer userNo, Integer dayNo) {
-        RecordDay recordDay = getMyRecordDay(userNo, dayNo);
+        RecordDay recordDay = getMyRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         recordDayRepository.delete(recordDay);
     }
 
-    private Record getMyRecord(Integer userNo, Integer recordNo) {
-        Record record = recordRepository.findById(recordNo)
+    private Record getMyRecord(Integer recordNo) {
+        return recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-
-        if (!record.getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.RECORD_ACCESS_DENIED);
-        }
-        return record;
     }
 
-    private RecordDay getMyRecordDay(Integer userNo, Integer dayNo) {
-        RecordDay recordDay = recordDayRepository.findById(dayNo)
+    private RecordDay getMyRecordDay(Integer dayNo) {
+        return recordDayRepository.findById(dayNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
-        if (!recordDay.getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.RECORD_ACCESS_DENIED);
-        }
-        return recordDay;
     }
 
 }

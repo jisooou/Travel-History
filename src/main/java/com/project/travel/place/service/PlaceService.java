@@ -1,5 +1,6 @@
 package com.project.travel.place.service;
 
+import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.place.dto.request.PlaceRequestDto;
@@ -21,10 +22,12 @@ import java.util.List;
 public class PlaceService {
     private final PlaceRepository placeRepository;
     private final RecordRepository recordRepository;
+    private final CollabAuthorityService collabAuthorityService;
 
     @Transactional
     public PlaceResponseDto addPlaceToRecord(Integer userNo, Integer recordNo, @Valid PlaceRequestDto requestDto) {
-        Record record = getMyRecord(userNo, recordNo);
+        Record record = getMyRecord(recordNo);
+        collabAuthorityService.checkEditable(recordNo, userNo);
 
         Place place = placeRepository
                 .findByRecord_RecordNoAndMapSourceAndMapPlaceId(
@@ -49,7 +52,9 @@ public class PlaceService {
     }
 
     public List<PlaceResponseDto> getPlaceOfRecord(Integer userNo, Integer recordNo) {
-        getMyRecord(userNo, recordNo);
+        getMyRecord(recordNo);
+        collabAuthorityService.checkViewable(recordNo, userNo);
+
         return placeRepository.findByRecord_RecordNo(recordNo)
                 .stream()
                 .map(PlaceResponseDto::from)
@@ -58,25 +63,21 @@ public class PlaceService {
 
     @Transactional
     public void deletePlace(Integer userNo, Integer placeNo) {
-        Place place = getMyPlace(userNo, placeNo);
+        Place place = getMyPlace(placeNo);
+        Integer recordNo = place.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         placeRepository.delete(place);
     }
 
-    private Record getMyRecord(Integer userNo, Integer recordNo) {
-        Record record = recordRepository.findById(recordNo)
+    private Record getMyRecord(Integer recordNo) {
+        return recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
-        if (!record.getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.RECORD_ACCESS_DENIED);
-        }
-        return record;
     }
 
-    private Place getMyPlace(Integer userNo, Integer placeNo) {
-        Place place = placeRepository.findById(placeNo)
+    private Place getMyPlace(Integer placeNo) {
+        return placeRepository.findById(placeNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.PLACE_NOT_FOUND));
-        if (!place.getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.PLACE_ACCESS_DENIED);
-        }
-        return place;
     }
 }

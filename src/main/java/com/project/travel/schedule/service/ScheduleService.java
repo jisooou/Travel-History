@@ -1,5 +1,6 @@
 package com.project.travel.schedule.service;
 
+import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.place.entity.Place;
@@ -24,11 +25,15 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final RecordDayRepository recordDayRepository;
     private final PlaceRepository placeRepository;
+    private final CollabAuthorityService collabAuthorityService;
 
     @Transactional
     public ScheduleResponseDto createSchedule(Integer userNo, Integer dayNo, @Valid ScheduleRequestDto requestDto) {
-        RecordDay recordDay = getRecordDay(userNo, dayNo);
+        RecordDay recordDay = getRecordDay(dayNo);
         Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
+
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+        collabAuthorityService.checkEditable(recordNo, userNo);
 
         SchedulePlace schedulePlace = SchedulePlace.builder()
                 .day(recordDay)
@@ -41,7 +46,11 @@ public class ScheduleService {
     }
 
     public List<ScheduleResponseDto> getScheduleOfDay(Integer userNo, Integer dayNo) {
-        getRecordDay(userNo, dayNo);
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkViewable(recordNo, userNo);
+
         return scheduleRepository.findByDay_DayNo(dayNo)
                 .stream()
                 .map(ScheduleResponseDto::from)
@@ -50,9 +59,12 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponseDto updateScheduleOfDay(Integer userNo, Integer scheduleNo, @Valid ScheduleRequestDto requestDto) {
-        SchedulePlace schedulePlace = getMySchedule(userNo, scheduleNo);
+        SchedulePlace schedulePlace = getMySchedule(scheduleNo);
         RecordDay recordDay = schedulePlace.getDay();
         Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
+
+        Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
+        collabAuthorityService.checkEditable(recordNo, userNo);
 
         schedulePlace.update(requestDto, place);
         return ScheduleResponseDto.from(schedulePlace);
@@ -60,27 +72,21 @@ public class ScheduleService {
 
     @Transactional
     public void deleteScheduleOfDay(Integer userNo, Integer scheduleNo) {
-        SchedulePlace schedulePlace = getMySchedule(userNo, scheduleNo);
+        SchedulePlace schedulePlace = getMySchedule(scheduleNo);
+        Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
         scheduleRepository.delete(schedulePlace);
     }
 
-    private RecordDay getRecordDay(Integer userNo, Integer recordDayNo) {
-        RecordDay recordDay = recordDayRepository.findById(recordDayNo)
+    private RecordDay getRecordDay(Integer recordDayNo) {
+        return recordDayRepository.findById(recordDayNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
-
-        if (!recordDay.getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.RECORD_DAY_ACCESS_DENIED);
-        }
-        return recordDay;
     }
 
-    private SchedulePlace getMySchedule(Integer userNo, Integer scheduleNo) {
-        SchedulePlace schedulePlace = scheduleRepository.findById(scheduleNo)
+    private SchedulePlace getMySchedule(Integer scheduleNo) {
+        return scheduleRepository.findById(scheduleNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCHEDULE_NOT_FOUND));
-        if (!schedulePlace.getDay().getRecord().getOwner().getUserNo().equals(userNo)) {
-            throw new CustomException(ErrorCode.SCHEDULE_ACCESS_DENIED);
-        }
-        return schedulePlace;
     }
 
     private Place checkPlaceInSameRecord(Integer placeNo, RecordDay recordDay) {
