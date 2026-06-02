@@ -74,4 +74,8 @@ public class Record {
     public void delete() {
         this.isDeleted = true;
     }
+
+    public boolean isDeleted() {
+        return this.isDeleted;
+    }
 }
