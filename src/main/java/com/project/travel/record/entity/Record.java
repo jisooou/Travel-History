@@ -19,6 +19,7 @@ import java.util.UUID;
 public class Record {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "RECORD_NO")
     private Integer recordNo;
 
     @Column(name = "RECORD_UUID", nullable = false, unique = true, columnDefinition = "BINARY(16)")
