@@ -23,12 +23,12 @@ public class PlaceSearchService {
                 .uri(
                         uriBuilder -> uriBuilder
                                 .scheme("https")
-                                .host("dapi.kako.com")
+                                .host("dapi.kakao.com")
                                 .path("/v2/local/search/keyword.json")
                                 .queryParam("query", keyword)
                                 .build()
                 )
-                .header("Authorization", "KakaoAK" + kakaoRestApiKey)
+                .header("Authorization", "KakaoAK " + kakaoRestApiKey)
                 .retrieve()
                 .body(MapApiPlaceSearchResponseDto.class);
 
