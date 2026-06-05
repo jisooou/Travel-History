@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 public class Todo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "TODO_NO")
     private Integer todoNo;
 
     @ManyToOne(fetch = FetchType.LAZY)

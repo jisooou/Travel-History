@@ -16,6 +16,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "USER_NO")
     private Integer userNo;
 
     @Column(name = "USER_UUID", nullable = false, unique = true, columnDefinition = "BINARY(16)")

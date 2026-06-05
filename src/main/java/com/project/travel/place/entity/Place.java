@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 public class Place {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "PLACE_NO")
     private Integer placeNo;
 
     @ManyToOne(fetch = FetchType.LAZY)

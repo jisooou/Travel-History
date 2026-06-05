@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 public class SchedulePlace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "SCHEDULE_NO")
     private Integer scheduleNo;
 
     @ManyToOne(fetch = FetchType.LAZY)

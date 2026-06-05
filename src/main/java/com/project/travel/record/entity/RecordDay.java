@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 public class RecordDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "DAY_NO")
     private Integer dayNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
