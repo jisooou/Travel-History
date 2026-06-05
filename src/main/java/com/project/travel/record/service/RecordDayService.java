@@ -39,7 +39,7 @@ public class RecordDayService {
     }
 
     public List<RecordDayResponseDto> getRecordDays(Integer userNo, Integer recordNo) {
-        getAccessRecordDay(recordNo);
+        getAccessRecord(recordNo);
         collabAuthorityService.checkViewable(recordNo, userNo);
 
         return recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo)
