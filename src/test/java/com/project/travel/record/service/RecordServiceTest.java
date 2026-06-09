@@ -74,21 +74,11 @@ class RecordServiceTest {
     void create_record_success() {
 //        given
         Integer userNo = 1;
-        User user = User.builder()
-                .email("test@test.com")
-                .userName("test")
-                .password("test12345")
-                .build();
-        RecordRequestDto requestDto = new RecordRequestDto();
-        ReflectionTestUtils.setField(requestDto, "recordName", "제주 여행");
-        ReflectionTestUtils.setField(requestDto, "travelType", TravelType.DOMESTIC);
+        User user = createUser();
 
-        Record savedRecord = Record.builder()
-                .owner(user)
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(savedRecord, "recordNo", 1);
+        RecordRequestDto requestDto = createRecordRequest("제주 여행", TravelType.DOMESTIC);
+
+        Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
 
         when(userRepository.findById(userNo))
                 .thenReturn(Optional.of(user));
@@ -110,22 +100,11 @@ class RecordServiceTest {
 //        given
         Integer userNo = 1;
 
-        User user = User.builder()
-                .email("test@test.com")
-                .userName("test")
-                .password("test12345")
-                .build();
+        User user = createUser();
 
-        RecordRequestDto recordRequestDto = new RecordRequestDto();
-        ReflectionTestUtils.setField(recordRequestDto, "recordName", "제주 여행");
-        ReflectionTestUtils.setField(recordRequestDto, "travelType", TravelType.DOMESTIC);
+        RecordRequestDto recordRequestDto = createRecordRequest("제주 여행", TravelType.DOMESTIC);
 
-        Record savedRecord = Record.builder()
-                .owner(user)
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(savedRecord, "recordNo", 1);
+        Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
 
         when(userRepository.findById(userNo))
                 .thenReturn(Optional.of(user));
@@ -153,25 +132,10 @@ class RecordServiceTest {
 //        given
         Integer userNo = 1;
 
-        User user = User.builder()
-                .email("test@test.com")
-                .userName("test")
-                .password("test12345")
-                .build();
+        User user = createUser();
 
-        Record ownerRecord = Record.builder()
-                .owner(user)
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(ownerRecord, "recordNo", 1);
-
-        Record editorRecord = Record.builder()
-                .owner(user)
-                .recordName("일본 여행")
-                .travelType(TravelType.OVERSEAS)
-                .build();
-        ReflectionTestUtils.setField(editorRecord, "recordNo", 2);
+        Record ownerRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
+        Record editorRecord = createRecord(user, 2, "일본 여행", TravelType.OVERSEAS);
 
         Collab ownerCollab = Collab.builder()
                 .record(ownerRecord)
@@ -207,11 +171,7 @@ class RecordServiceTest {
         Integer userNo = 1;
         Integer recordNo = 1;
 
-        Record record = Record.builder()
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+        Record record = getRecord(1, "제주 여행", TravelType.DOMESTIC);
 
         when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
@@ -241,15 +201,9 @@ class RecordServiceTest {
         Integer userNo = 1;
         Integer recordNo = 1;
 
-        Record record = Record.builder()
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+        Record record = getRecord(1, "제주 여행", TravelType.DOMESTIC);
 
-        RecordRequestDto requestDto = new RecordRequestDto();
-        ReflectionTestUtils.setField(requestDto, "recordName", "일본 여행");
-        ReflectionTestUtils.setField(requestDto, "travelType", TravelType.OVERSEAS);
+        RecordRequestDto requestDto = createRecordRequest("일본 여행", TravelType.OVERSEAS);
 
         when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
@@ -271,11 +225,7 @@ class RecordServiceTest {
         Integer userNo = 1;
         Integer recordNo = 1;
 
-        Record record = Record.builder()
-                .recordName("제주 여행")
-                .travelType(TravelType.DOMESTIC)
-                .build();
-        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+        Record record = getRecord(1, "제주 여행", TravelType.DOMESTIC);
 
         when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
@@ -287,5 +237,44 @@ class RecordServiceTest {
         assertThat(record.isDeleted()).isTrue();
 
         verify(collabAuthorityService).checkOwner(recordNo, userNo);
+    }
+
+    private User createUser() {
+        return User.builder()
+                .email("test@test.com")
+                .userName("test")
+                .password("test12345")
+                .build();
+    }
+
+    private Record createRecord(User user, Integer recordNo, String recordName, TravelType travelType) {
+        Record record = Record.builder()
+                .owner(user)
+                .recordName(recordName)
+                .travelType(travelType)
+                .build();
+        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+        return record;
+    }
+
+    private Record getRecord(Integer recordNo, String recordName, TravelType travelType) {
+        Record record = Record.builder()
+                .recordName(recordName)
+                .travelType(travelType)
+                .build();
+        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+        return record;
+    }
+
+    private RecordRequestDto createRecordRequest(
+            String recordName,
+            TravelType travelType
+    ) {
+        RecordRequestDto requestDto = new RecordRequestDto();
+
+        ReflectionTestUtils.setField(requestDto, "recordName", recordName);
+        ReflectionTestUtils.setField(requestDto, "travelType", travelType);
+
+        return requestDto;
     }
 }
