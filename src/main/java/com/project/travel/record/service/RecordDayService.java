@@ -11,6 +11,7 @@ import com.project.travel.record.repository.RecordDayRepository;
 import com.project.travel.record.repository.RecordRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,13 +51,18 @@ public class RecordDayService {
 
     @Transactional
     public RecordDayResponseDto updateRecordDay(Integer userNo, Integer dayNo, @Valid RecordDayRequestDto requestDto) {
-        RecordDay recordDay = getAccessRecordDay(dayNo);
-        Integer recordNo = recordDay.getRecord().getRecordNo();
+        try {
+            RecordDay recordDay = getAccessRecordDay(dayNo);
+            Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkEditable(recordNo, userNo);
 
-        recordDay.update(requestDto);
-        return RecordDayResponseDto.from(recordDay);
+            recordDay.update(requestDto);
+            recordDayRepository.flush();
+            return RecordDayResponseDto.from(recordDay);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CustomException(ErrorCode.RECORD_DAY_CONFLICT);
+        }
     }
 
     @Transactional
