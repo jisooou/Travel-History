@@ -26,7 +26,7 @@ public enum ErrorCode {
     RECORD_ACCESS_DENIED(400, "R002", "해당 기록에 접근할 수 없습니다."),
     RECORD_DAY_NOT_FOUND(400, "R003", "해당 기록 날짜를 찾을 수 없습니다."),
     RECORD_DAY_ACCESS_DENIED(400, "R004", "해당 기록 날짜에 접근할 수 없습니다."),
-    RECORD_DAY_CONFLICT(409, "R005", "다른 사용자와 동일한 날짜 수정이 감지되었습니다. 다시 조회해 주세요."),
+    RECORD_DAY_CONFLICT(409, "R005", "동일한 날짜 수정이 감지되었습니다. 다시 조회해 주세요."),
     //    PLACE
     PLACE_NOT_FOUND(404, "P001", "해당 장소를 찾을 수 없습니다."),
     PLACE_ACCESS_DENIED(400, "P002", "해당 장소를 넣을 수 없습니다."),
