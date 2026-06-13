@@ -45,6 +45,10 @@ public class RecordDay {
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
+
     @Builder
     public RecordDay(Record record, LocalDate travelDate, Integer dayOrder) {
         this.record = record;
