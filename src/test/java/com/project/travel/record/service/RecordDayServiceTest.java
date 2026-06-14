@@ -49,8 +49,7 @@ public class RecordDayServiceTest {
         Record record = createRecord(user, recordNo, "제주 여행", TravelType.DOMESTIC);
 
         RecordDayRequestDto requestDto = createRecordDayRequest(
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
 
         RecordDay savedRecordDay = createRecordDay(
@@ -62,6 +61,9 @@ public class RecordDayServiceTest {
 
         when(recordRepository.findById(recordNo))
                 .thenReturn(Optional.of(record));
+
+        when(recordDayRepository.findMaxDayOrderByRecordNo(recordNo))
+                .thenReturn(Optional.empty());
 
         when(recordDayRepository.save(any(RecordDay.class)))
                 .thenReturn(savedRecordDay);
@@ -75,6 +77,47 @@ public class RecordDayServiceTest {
         assertThat(responseDto.getDayOrder()).isEqualTo(1);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(recordDayRepository).findMaxDayOrderByRecordNo(recordNo);
+        verify(recordDayRepository).save(any(RecordDay.class));
+    }
+
+    @Test
+    @DisplayName("다음 날짜의 dayOrder 생성에 성공한다")
+    void create_next_record_day_day_order_success() {
+//        given
+        Integer userNo = 1;
+        Integer recordNo = 1;
+
+        User user = createUser();
+        Record record = createRecord(user, recordNo, "제주 여행", TravelType.DOMESTIC);
+
+        RecordDayRequestDto requestDto = createRecordDayRequest(
+                LocalDate.of(2026, 1, 2)
+        );
+
+        RecordDay savedRecordDay = createRecordDay(
+                record,
+                2,
+                LocalDate.of(2026, 1, 2),
+                2
+        );
+
+        when(recordRepository.findById(recordNo))
+                .thenReturn(Optional.of(record));
+        when(recordDayRepository.findMaxDayOrderByRecordNo(recordNo))
+                .thenReturn(Optional.of(1));
+        when(recordDayRepository.save(any(RecordDay.class)))
+                .thenReturn(savedRecordDay);
+
+//        when
+        RecordDayResponseDto responseDto = recordDayService.createRecordDay(userNo, recordNo, requestDto);
+
+//        then
+        assertThat(responseDto.getDayOrder()).isEqualTo(2);
+        assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
+
+        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(recordDayRepository).findMaxDayOrderByRecordNo(recordNo);
         verify(recordDayRepository).save(any(RecordDay.class));
     }
 
@@ -86,8 +129,7 @@ public class RecordDayServiceTest {
         Integer recordNo = 999;
 
         RecordDayRequestDto requestDto = createRecordDayRequest(
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
 
         when(recordRepository.findById(recordNo))
@@ -183,8 +225,7 @@ public class RecordDayServiceTest {
                 1
         );
         RecordDayRequestDto requestDto = createRecordDayRequest(
-                LocalDate.of(2026, 1, 2),
-                2
+                LocalDate.of(2026, 1, 2)
         );
 
         when(recordDayRepository.findById(dayNo))
@@ -195,7 +236,7 @@ public class RecordDayServiceTest {
 
 //        then
         assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
-        assertThat(responseDto.getDayOrder()).isEqualTo(2);
+        assertThat(responseDto.getDayOrder()).isEqualTo(1);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
     }
@@ -208,8 +249,7 @@ public class RecordDayServiceTest {
         Integer dayNo = 999;
 
         RecordDayRequestDto requestDto = createRecordDayRequest(
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
 
         when(recordDayRepository.findById(dayNo))
@@ -300,11 +340,10 @@ public class RecordDayServiceTest {
         return recordDay;
     }
 
-    private RecordDayRequestDto createRecordDayRequest(LocalDate travelDate, Integer dayOrder) {
+    private RecordDayRequestDto createRecordDayRequest(LocalDate travelDate) {
         RecordDayRequestDto requestDto = new RecordDayRequestDto();
 
         ReflectionTestUtils.setField(requestDto, "travelDate", travelDate);
-        ReflectionTestUtils.setField(requestDto, "dayOrder", dayOrder);
         return requestDto;
     }
 }
