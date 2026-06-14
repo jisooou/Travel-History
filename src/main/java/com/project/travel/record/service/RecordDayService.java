@@ -30,10 +30,14 @@ public class RecordDayService {
         Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
+//        dayOrder 계산
+        Integer nextDayOrder = recordDayRepository.findMaxDayOrderByRecordNo(recordNo)
+                .orElse(0) + 1;
+
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
                 .travelDate(requestDto.getTravelDate())
-                .dayOrder(requestDto.getDayOrder())
+                .dayOrder(nextDayOrder)
                 .build();
         RecordDay savedRecordDay = recordDayRepository.save(recordDay);
         return RecordDayResponseDto.from(savedRecordDay);
