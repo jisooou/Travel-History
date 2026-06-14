@@ -9,7 +9,4 @@ import java.time.LocalDate;
 public class RecordDayRequestDto {
     @NotNull
     private LocalDate travelDate;
-
-    @NotNull
-    private Integer dayOrder;
 }

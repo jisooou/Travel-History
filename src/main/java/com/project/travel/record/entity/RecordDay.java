@@ -66,6 +66,5 @@ public class RecordDay {
     //    책임1 : RecordDay update
     public void update(RecordDayRequestDto requestDto) {
         this.travelDate = requestDto.getTravelDate();
-        this.dayOrder = requestDto.getDayOrder();
     }
 }
