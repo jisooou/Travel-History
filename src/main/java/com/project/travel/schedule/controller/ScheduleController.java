@@ -2,6 +2,7 @@ package com.project.travel.schedule.controller;
 
 import com.project.travel.auth.security.CustomUserDetails;
 import com.project.travel.global.response.ApiResponse;
+import com.project.travel.schedule.dto.request.ScheduleReorderRequestDto;
 import com.project.travel.schedule.dto.request.ScheduleRequestDto;
 import com.project.travel.schedule.dto.response.ScheduleResponseDto;
 import com.project.travel.schedule.service.ScheduleService;
@@ -52,5 +53,14 @@ public class ScheduleController {
     ) {
         scheduleService.deleteScheduleOfDay(userDetails.getUserNo(), scheduleNo);
         return ApiResponse.success(null);
+    }
+
+    @PatchMapping("/days/{dayNo}/reorder")
+    public ApiResponse<List<ScheduleResponseDto>> reorderSchedules(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Integer dayNo,
+            @Valid @RequestBody ScheduleReorderRequestDto requestDto
+    ) {
+        return ApiResponse.success(scheduleService.reorderSchedules(userDetails.getUserNo(), dayNo, requestDto));
     }
 }

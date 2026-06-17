@@ -7,6 +7,8 @@ import com.project.travel.place.entity.Place;
 import com.project.travel.place.repository.PlaceRepository;
 import com.project.travel.record.entity.RecordDay;
 import com.project.travel.record.repository.RecordDayRepository;
+import com.project.travel.schedule.dto.request.ScheduleOrderRequestDto;
+import com.project.travel.schedule.dto.request.ScheduleReorderRequestDto;
 import com.project.travel.schedule.dto.request.ScheduleRequestDto;
 import com.project.travel.schedule.dto.response.ScheduleResponseDto;
 import com.project.travel.schedule.entity.SchedulePlace;
@@ -17,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +56,7 @@ public class ScheduleService {
 
         collabAuthorityService.checkViewable(recordNo, userNo);
 
-        return scheduleRepository.findByDay_DayNo(dayNo)
+        return scheduleRepository.findByDay_DayNoOrderByTimeSlotSortOrderAsc(dayNo)
                 .stream()
                 .map(ScheduleResponseDto::from)
                 .toList();
@@ -96,5 +101,65 @@ public class ScheduleService {
             throw new CustomException(ErrorCode.PLACE_ACCESS_DENIED);
         }
         return place;
+    }
+
+    @Transactional
+    public List<ScheduleResponseDto> reorderSchedules(Integer userNo, Integer dayNo, @Valid ScheduleReorderRequestDto requestDto) {
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
+
+        List<SchedulePlace> schedulePlaces = scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, requestDto.getTimeSlot());
+
+//        scheduleNo로 Place를 빠르게 찾을 수 있도록 한다.
+        Map<Integer, SchedulePlace> scheduleMap = schedulePlaces.stream()
+                .collect(Collectors.toMap(
+                        SchedulePlace::getScheduleNo,
+                        Function.identity()
+                ));
+
+        validateReorderRequest(requestDto, scheduleMap);
+
+        for (ScheduleOrderRequestDto orderRequestDto : requestDto.getSchedules()) {
+            SchedulePlace schedulePlace = scheduleMap.get(orderRequestDto.getScheduleNo());
+            schedulePlace.updateSortOrder(orderRequestDto.getSortOrder());
+        }
+
+        return schedulePlaces.stream()
+                .sorted((schedule1, schedule2) -> schedule1.getSortOrder().compareTo(schedule2.getSortOrder()))
+                .map(ScheduleResponseDto::from)
+                .toList();
+    }
+
+    private void validateReorderRequest(ScheduleReorderRequestDto requestDto, Map<Integer, SchedulePlace> scheduleMap) {
+//        올바른 ScheduleNo 확인
+        for (ScheduleOrderRequestDto orderRequestDto : requestDto.getSchedules()) {
+            if (!scheduleMap.containsKey(orderRequestDto.getScheduleNo())) {
+                throw new CustomException(ErrorCode.SCHEDULE_INVALID_REORDER);
+            }
+        }
+//        중복되지 않은 ScheduleNo 확인
+        long distinctScheduleCnt = requestDto.getSchedules().stream()
+                .map(ScheduleOrderRequestDto::getScheduleNo)
+                .distinct()
+                .count();
+        if (distinctScheduleCnt != requestDto.getSchedules().size()) {
+            throw new CustomException(ErrorCode.SCHEDULE_INVALID_REORDER);
+        }
+
+//        sort 하기 전과 동일한 schedule(개수) 확인
+        if (requestDto.getSchedules().size() != scheduleMap.size()) {
+            throw new CustomException(ErrorCode.SCHEDULE_INVALID_REORDER);
+        }
+
+//        중복되지 않은 sort 확인
+        long distinctSortCnt = requestDto.getSchedules().stream()
+                .map(ScheduleOrderRequestDto::getSortOrder)
+                .distinct()
+                .count();
+        if (distinctSortCnt != requestDto.getSchedules().size()) {
+            throw new CustomException(ErrorCode.SCHEDULE_INVALID_REORDER);
+        }
     }
 }
