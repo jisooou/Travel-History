@@ -33,6 +33,7 @@ public enum ErrorCode {
     //    SCHEDULE
     SCHEDULE_NOT_FOUND(404, "S001", "해당 일정을 찾을 수 없습니다."),
     SCHEDULE_ACCESS_DENIED(400, "S002", "해당 일정에 접근할 수 없습니다."),
+    SCHEDULE_INVALID_REORDER(400, "S003", "잘못된 (일정)재배치입니다."),
     //    TODO
     TODO_NOT_FOUND(404, "T001", "해당 투두를 찾을 수 없습니다."),
     TODO_ACCESS_DENIED(400, "T002", "해당 투두에 접근할 수 없습니다."),
