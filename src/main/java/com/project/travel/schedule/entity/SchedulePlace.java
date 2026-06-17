@@ -19,7 +19,10 @@ import java.time.LocalDateTime;
         comment = "일정 배치",
         name = "schedule_place",
         indexes = {
-                @Index(name = "idx_schedule_day_slot", columnList = "DAY_NO, TIME_SLOT, SORT_ORDER")
+                @Index(name = "idx_schedule_day_time_sort", columnList = "DAY_NO, TIME_SLOT, SORT_ORDER")
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_schedule_day_time_sort", columnNames = {"DAY_NO", "TIME_SLOT", "SORT_ORDER"})
         }
 )
 public class SchedulePlace {
@@ -78,6 +81,10 @@ public class SchedulePlace {
     public void update(ScheduleRequestDto requestDto, Place place) {
         this.place = place;
         this.timeSlot = requestDto.getTimeSlot();
-        this.sortOrder = requestDto.getSortOrder();
+    }
+
+    //    Schedule 재정렬을 위해 sortOrder만 변경
+    public void updateSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 }
