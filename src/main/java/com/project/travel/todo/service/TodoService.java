@@ -15,6 +15,7 @@ import com.project.travel.user.entity.User;
 import com.project.travel.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,34 +66,49 @@ public class TodoService {
 
     @Transactional
     public TodoResponseDto updateTodoOfDay(Integer userNo, Integer todoNo, @Valid TodoCreateRequestDto createRequestDto) {
-        Todo todo = getAccessTodo(todoNo);
-        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+        try {
+            Todo todo = getAccessTodo(todoNo);
+            Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkEditable(recordNo, userNo);
 
-        todo.updateContent(createRequestDto.getTodoContent());
-        return TodoResponseDto.from(todo);
+            todo.updateContent(createRequestDto.getTodoContent());
+            todoRepository.flush();
+            return TodoResponseDto.from(todo);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CustomException(ErrorCode.TODO_CONFLICT);
+        }
     }
 
     @Transactional
     public TodoStatusResponseDto updateTodoStatus(Integer userNo, Integer todoNo, @Valid TodoStatusUpdateRequestDto requestDto) {
-        Todo todo = getAccessTodo(todoNo);
-        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+        try {
+            Todo todo = getAccessTodo(todoNo);
+            Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkEditable(recordNo, userNo);
 
-        todo.updateStatus(requestDto.getCompletedStatus());
-        return TodoStatusResponseDto.from(todo);
+            todo.updateStatus(requestDto.getCompletedStatus());
+            todoRepository.flush();
+            return TodoStatusResponseDto.from(todo);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CustomException(ErrorCode.TODO_CONFLICT);
+        }
     }
 
     @Transactional
     public void deleteTodo(Integer userNo, Integer todoNo) {
-        Todo todo = getAccessTodo(todoNo);
-        Integer recordNo = todo.getDay().getRecord().getRecordNo();
+        try {
+            Todo todo = getAccessTodo(todoNo);
+            Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkEditable(recordNo, userNo);
 
-        todoRepository.delete(todo);
+            todoRepository.delete(todo);
+            todoRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CustomException(ErrorCode.TODO_CONFLICT);
+        }
     }
 
     private RecordDay getRecordDay(Integer dayNo) {
