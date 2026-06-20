@@ -19,6 +19,10 @@ import java.util.UUID;
                 @UniqueConstraint(
                         name = "uk_record_guest_name",
                         columnNames = {"RECORD_NO", "GUEST_NAME"}
+                ),
+                @UniqueConstraint(
+                        name = "uk_record_guest_no",
+                        columnNames = {"RECORD_NO", "GUEST_NO"}
                 )
         },
         indexes = {
