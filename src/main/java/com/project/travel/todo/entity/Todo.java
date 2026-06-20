@@ -53,6 +53,10 @@ public class Todo {
     @Column(name = "CREATED_AT", nullable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
+
     @Builder
     public Todo(RecordDay day, User writer, String todoContent, CompletedStatus isCompleted) {
         this.day = day;
