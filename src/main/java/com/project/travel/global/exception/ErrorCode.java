@@ -37,6 +37,7 @@ public enum ErrorCode {
     //    TODO
     TODO_NOT_FOUND(404, "T001", "해당 투두를 찾을 수 없습니다."),
     TODO_ACCESS_DENIED(400, "T002", "해당 투두에 접근할 수 없습니다."),
+    TODO_CONFLICT(409, "T003", "동일한 Todo 접근이 감지되었습니다. 다시 조회해 주세요."),
     //COLLAB
     COLLAB_AUTHORITY_OWNER(404, "C001", "OWNER 권한이 필요합니다."),
     COLLAB_AUTHORITY_EDITOR(404, "C002", "수정 권한이 없습니다."),
