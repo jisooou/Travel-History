@@ -71,9 +71,10 @@ public class InviteService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         InviteInfo inviteInfo = inviteInfoRepository.findByInviteNoAndStatus(inviteNo, InviteStatus.PENDING)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT));
-        if (!inviteInfo.getInviteEmail().equals(email)) {
-            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
-        }
+//        if (!inviteInfo.getInviteEmail().equals(email)) {
+//            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
+//        }
+        
 //        이미 참여중인지 확인한다.
         Integer recordNo = inviteInfo.getRecord().getRecordNo();
         if (collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, userNo)) {
