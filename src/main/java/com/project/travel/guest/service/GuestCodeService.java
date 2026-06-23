@@ -4,6 +4,7 @@ import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.guest.dto.response.GuestCodeResponseDto;
+import com.project.travel.guest.entity.CodeActiveStatus;
 import com.project.travel.guest.entity.GuestCode;
 import com.project.travel.guest.repository.GuestCodeRepository;
 import com.project.travel.record.entity.Record;
@@ -37,7 +38,7 @@ public class GuestCodeService {
         Record record = recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 //        하나의 Record 안에 다른 활성화된 코드가 없는지 확인한다.
-        List<GuestCode> activeCodes = guestCodeRepository.findAllByRecord_RecordNoAndIsActive(recordNo, User.ActiveStatus.ACTIVE);
+        List<GuestCode> activeCodes = guestCodeRepository.findAllByRecord_RecordNoAndIsActive(recordNo, CodeActiveStatus.ACTIVE);
 //        만약 활성화 되어있는 코드가 있다면 비활성화로 변경한다. (만료가 되지 않은 코드)
         for (GuestCode code : activeCodes) {
             code.inactive();
