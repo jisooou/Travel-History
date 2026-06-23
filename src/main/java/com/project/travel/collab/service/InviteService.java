@@ -77,7 +77,7 @@ public class InviteService {
 //        이미 참여중인지 확인한다.
         Integer recordNo = inviteInfo.getRecord().getRecordNo();
         if (collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, userNo)) {
-            throw new CustomException(ErrorCode.INVITE_COLLAB_ALREADY_EXiST);
+            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 
         Collab collab = Collab.builder()
