@@ -48,8 +48,20 @@ public class GuestCodeServiceTest {
         User user = createUser();
         Record record = createRecord(user, recordNo);
 
-        GuestCode oldCode = createGuestCode(record, 1, "OLD_CODE", CodeActiveStatus.ACTIVE);
-        GuestCode newCode = createGuestCode(record, 2, "NEW_CODE", CodeActiveStatus.ACTIVE);
+        GuestCode oldCode = createGuestCode(
+                record,
+                1,
+                "OLD_CODE",
+                CodeActiveStatus.ACTIVE,
+                LocalDateTime.now().plusDays(7)
+        );
+        GuestCode newCode = createGuestCode(
+                record,
+                2,
+                "NEW_CODE",
+                CodeActiveStatus.ACTIVE,
+                LocalDateTime.now().plusDays(7)
+        );
 
         when(recordRepository.findById(recordNo))
                 .thenReturn(Optional.of(record));
@@ -108,21 +120,6 @@ public class GuestCodeServiceTest {
                 .build();
         ReflectionTestUtils.setField(record, "recordNo", recordNo);
         return record;
-    }
-
-    private GuestCode createGuestCode(
-            Record record,
-            Integer joinCodeNo,
-            String joinCode,
-            CodeActiveStatus codeActiveStatus
-    ) {
-        return createGuestCode(
-                record,
-                joinCodeNo,
-                joinCode,
-                codeActiveStatus,
-                LocalDateTime.now().plusDays(7)
-        );
     }
 
     private GuestCode createGuestCode(
