@@ -4,6 +4,7 @@ import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.guest.dto.request.GuestJoinRequestDto;
 import com.project.travel.guest.dto.response.GuestJoinResponseDto;
+import com.project.travel.guest.entity.CodeActiveStatus;
 import com.project.travel.guest.entity.Guest;
 import com.project.travel.guest.entity.GuestCode;
 import com.project.travel.guest.repository.GuestCodeRepository;
@@ -29,7 +30,7 @@ public class GuestJoinService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
 
         GuestCode guestCode = guestCodeRepository
-                .findByJoinCodeAndIsActive(requestDto.getGuestCode(), User.ActiveStatus.ACTIVE)
+                .findByJoinCodeAndIsActive(requestDto.getGuestCode(), CodeActiveStatus.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.GUEST_CODE_INVALID_CODE));
         if (!guestCode.getRecord().getRecordNo().equals(recordNo)) {
             throw new CustomException(ErrorCode.GUEST_CODE_INVALID_RECORD);
