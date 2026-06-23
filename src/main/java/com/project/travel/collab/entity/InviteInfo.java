@@ -60,7 +60,7 @@ public class InviteInfo {
         this.inviteEmail = inviteEmail;
         this.inviteUser = user;
         this.inviteRole = inviteRole;
-        this.status = InviteStatus.NONE;
+        this.status = InviteStatus.PENDING; //InviteService에서 InviteInfo 객체를 생성하면 InviteStatus는 PENDING이 적합하다.
     }
 
     @PrePersist
