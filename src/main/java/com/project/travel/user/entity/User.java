@@ -62,4 +62,8 @@ public class User {
     public enum ActiveStatus {
         ACTIVE, INACTIVE
     }
+
+    public void inactive() {
+        this.isActive = ActiveStatus.INACTIVE;
+    }
 }
