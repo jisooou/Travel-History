@@ -1,5 +1,6 @@
 package com.project.travel.user.service;
 
+import com.project.travel.auth.service.TokenRedisService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.user.dto.request.UserSignUpRequestDto;
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailService emailService;
+    private final TokenRedisService tokenRedisService;
 
     @Transactional
     public UserSignUpResponseDto signUp(UserSignUpRequestDto requestDto) {
@@ -41,5 +43,18 @@ public class UserService {
         userRepository.save(user);
         emailService.removeVerifiedEmail(requestDto.getEmail());
         return UserSignUpResponseDto.from(user);
+    }
+
+    @Transactional
+    public void signOut(Integer userNo) {
+        User user = userRepository.findById(userNo)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getIsActive() == User.ActiveStatus.INACTIVE) {
+            throw new CustomException(ErrorCode.USER_STATUS_INACTIVE);
+        }
+
+        user.inactive();
+        tokenRedisService.deleteRefreshToken(userNo);
     }
 }

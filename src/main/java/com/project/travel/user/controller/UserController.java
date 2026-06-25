@@ -1,5 +1,6 @@
 package com.project.travel.user.controller;
 
+import com.project.travel.auth.security.CustomUserDetails;
 import com.project.travel.global.response.ApiResponse;
 import com.project.travel.user.dto.request.EmailSendRequestDto;
 import com.project.travel.user.dto.request.EmailVerifyRequestDto;
@@ -9,10 +10,8 @@ import com.project.travel.user.service.EmailService;
 import com.project.travel.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,5 +35,11 @@ public class UserController {
     @PostMapping("/signup")
     public ApiResponse<UserSignUpResponseDto> signUp(@Valid @RequestBody UserSignUpRequestDto userSignUpRequestDto) {
         return ApiResponse.success(userService.signUp(userSignUpRequestDto));
+    }
+
+    @PatchMapping("/signout")
+    public ApiResponse<Void> signOut(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.signOut(userDetails.getUserNo());
+        return ApiResponse.success(null);
     }
 }
