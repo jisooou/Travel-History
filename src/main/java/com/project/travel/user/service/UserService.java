@@ -31,9 +31,10 @@ public class UserService {
         if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
-        if (requestDto.getUserName() != null && userRepository.existsByUserName(requestDto.getUserName())) {
-            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
-        }
+//        이름은 동명이인이 있는 경우를 생각하여 예외처리를 하지 않는다.
+//        if (requestDto.getUserName() != null && userRepository.existsByUserName(requestDto.getUserName())) {
+//            throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
+//        }
         String encodedPassword = bCryptPasswordEncoder.encode(requestDto.getPassword());
         User user = User.builder()
                 .email(requestDto.getEmail())
