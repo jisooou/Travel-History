@@ -17,7 +17,7 @@ public interface ScheduleRepository extends JpaRepository<SchedulePlace, Integer
 
     List<SchedulePlace> findByDay_Record_RecordNo(Integer recordNo);
 
-    List<SchedulePlace> findByDay_DayNoOrderByTimeSlotSortOrderAsc(Integer dayNo);
+    List<SchedulePlace> findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(Integer dayNo);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({

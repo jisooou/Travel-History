@@ -56,7 +56,7 @@ public class ScheduleService {
 
         collabAuthorityService.checkViewable(recordNo, userNo);
 
-        return scheduleRepository.findByDay_DayNoOrderByTimeSlotSortOrderAsc(dayNo)
+        return scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo)
                 .stream()
                 .map(ScheduleResponseDto::from)
                 .toList();
