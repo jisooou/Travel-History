@@ -137,7 +137,7 @@ public class ScheduleServiceTest {
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.of(recordDay));
-        when(scheduleRepository.findByDay_DayNoOrderByTimeSlotSortOrderAsc(dayNo))
+        when(scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo))
                 .thenReturn(List.of(scheduleA, scheduleB));
 
 //        when
@@ -150,7 +150,7 @@ public class ScheduleServiceTest {
                 .containsExactly(1, 2);
 
         verify(collabAuthorityService).checkViewable(recordNo, dayNo);
-        verify(scheduleRepository).findByDay_DayNoOrderByTimeSlotSortOrderAsc(dayNo);
+        verify(scheduleRepository).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo);
     }
 
     @Test
@@ -170,7 +170,7 @@ public class ScheduleServiceTest {
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
         verify(collabAuthorityService, never()).checkViewable(anyInt(), anyInt());
-        verify(scheduleRepository, never()).findByDay_DayNoOrderByTimeSlotSortOrderAsc(anyInt());
+        verify(scheduleRepository, never()).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(anyInt());
     }
 
     @Test
@@ -313,7 +313,7 @@ public class ScheduleServiceTest {
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.of(recordDay));
-        when(scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, TimeSlot.MORNING))
+        when(scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING))
                 .thenReturn(List.of(scheduleA, scheduleB, scheduleC, scheduleD));
 
 //        when
@@ -327,10 +327,10 @@ public class ScheduleServiceTest {
 
         assertThat(responseDtos)
                 .extracting(ScheduleResponseDto::getScheduleNo)
-                .containsExactly(3, 1, 4, 2);
+                .containsExactly(1, 2, 3, 4);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
-        verify(scheduleRepository).findByDayNoAndTimeSlotForUpdate(dayNo, TimeSlot.MORNING);
+        verify(scheduleRepository).findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING);
     }
 
     @Test
@@ -361,7 +361,7 @@ public class ScheduleServiceTest {
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.of(recordDay));
-        when(scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, TimeSlot.MORNING))
+        when(scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING))
                 .thenReturn(List.of(scheduleA, scheduleB));
 
 //        when, then
@@ -401,7 +401,7 @@ public class ScheduleServiceTest {
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.of(recordDay));
-        when(scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, TimeSlot.MORNING))
+        when(scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING))
                 .thenReturn(List.of(scheduleA, scheduleB));
 
 //        when, then
@@ -441,7 +441,7 @@ public class ScheduleServiceTest {
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.of(recordDay));
-        when(scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, TimeSlot.MORNING))
+        when(scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING))
                 .thenReturn(List.of(scheduleA, scheduleB));
 
 //        when, then
