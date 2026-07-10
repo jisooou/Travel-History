@@ -110,9 +110,9 @@ public class ScheduleService {
 
         collabAuthorityService.checkEditable(recordNo, userNo);
 
-        List<SchedulePlace> schedulePlaces = scheduleRepository.findByDayNoAndTimeSlotForUpdate(dayNo, requestDto.getTimeSlot());
+        List<SchedulePlace> schedulePlaces = scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, requestDto.getTimeSlot());
 
-//        scheduleNo로 Place를 빠르게 찾을 수 있도록 한다.
+//        scheduleNo로 schedulePlace를 빠르게 찾아 재정렬할 수 있도록 한다.
         Map<Integer, SchedulePlace> scheduleMap = schedulePlaces.stream()
                 .collect(Collectors.toMap(
                         SchedulePlace::getScheduleNo,
@@ -127,7 +127,6 @@ public class ScheduleService {
         }
 
         return schedulePlaces.stream()
-                .sorted((schedule1, schedule2) -> schedule1.getSortOrder().compareTo(schedule2.getSortOrder()))
                 .map(ScheduleResponseDto::from)
                 .toList();
     }

@@ -28,8 +28,9 @@ public interface ScheduleRepository extends JpaRepository<SchedulePlace, Integer
             from SchedulePlace sp
             where sp.day.dayNo = :dayNo
             and sp.timeSlot = :timeSlot
+            order by sp.sortOrder asc
             """)
-    List<SchedulePlace> findByDayNoAndTimeSlotForUpdate(
+    List<SchedulePlace> findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(
             @Param("dayNo") Integer dayNo,
             @Param("timeSlot") TimeSlot timeSlot
     );
