@@ -47,7 +47,7 @@ public class RecordDayService {
         getAccessRecord(recordNo);
         collabAuthorityService.checkViewable(recordNo, userNo);
 
-        return recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo)
+        return recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo)
                 .stream()
                 .map(RecordDayResponseDto::from)
                 .toList();
@@ -80,7 +80,7 @@ public class RecordDayService {
     }
 
     private Record getAccessRecord(Integer recordNo) {
-        return recordRepository.findById(recordNo)
+        return recordRepository.findByRecordNoAndIsDeletedFalse(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
     }
 

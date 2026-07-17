@@ -42,7 +42,7 @@ public class RecordService {
 
     @Transactional
     public RecordResponseDto createRecord(Integer userNo, @Valid RecordRequestDto requestDto) {
-        User user = userRepository.findById(userNo)
+        User user = userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.INACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Record record = Record.builder()
                 .owner(user)
@@ -63,13 +63,12 @@ public class RecordService {
 
     //    본인이 만든 Record + Editor로 초대받은 Record (Owner + Editor)
     public List<RecordResponseDto> getMyRecords(Integer userNo) {
-        return collabRepository.findAllByUser_UserNoAndRoleCodeIn(
+        return collabRepository.findAllByUser_UserNoAndRoleCodeInAndRecord_IsDeletedFalse(
                         userNo,
                         List.of(RoleCode.OWNER, RoleCode.EDITOR)
                 )
                 .stream()
                 .map(Collab::getRecord)
-                .filter(record -> !record.isDeleted())
                 .map(RecordResponseDto::from)
                 .toList();
     }
@@ -80,19 +79,19 @@ public class RecordService {
         collabAuthorityService.checkViewable(recordNo, userNo);
 
         List<RecordDayResponseDto> days = recordDayRepository
-                .findByRecord_RecordNoOrderByTravelDateAsc(recordNo)
+                .findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo)
                 .stream()
                 .map(RecordDayResponseDto::from)
                 .toList();
 
         List<ScheduleResponseDto> schedules = scheduleRepository
-                .findByDay_Record_RecordNo(recordNo)
+                .findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo)
                 .stream()
                 .map(ScheduleResponseDto::from)
                 .toList();
 
         List<TodoResponseDto> todos = todoRepository
-                .findByDay_Record_RecordNoOrderByCreatedAtAsc(recordNo)
+                .findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo)
                 .stream()
                 .map(TodoResponseDto::from)
                 .toList();
