@@ -169,7 +169,7 @@ public class RecordDayServiceTest {
 
         when(recordRepository.findById(recordNo))
                 .thenReturn(Optional.of(record));
-        when(recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo))
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
                 .thenReturn(List.of(day1, day2));
 
 //        when
@@ -185,7 +185,7 @@ public class RecordDayServiceTest {
                 );
 
         verify(collabAuthorityService).checkViewable(recordNo, userNo);
-        verify(recordDayRepository).findByRecord_RecordNoOrderByTravelDateAsc(recordNo);
+        verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
     }
 
     @Test
@@ -205,7 +205,7 @@ public class RecordDayServiceTest {
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
         verify(collabAuthorityService, never()).checkViewable(anyInt(), anyInt());
-        verify(recordDayRepository, never()).findByRecord_RecordNoOrderByTravelDateAsc(anyInt());
+        verify(recordDayRepository, never()).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(anyInt());
     }
 
     @Test

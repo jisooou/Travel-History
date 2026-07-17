@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -149,7 +148,7 @@ class RecordServiceTest {
                 .roleCode(RoleCode.EDITOR)
                 .build();
 
-        when(collabRepository.findAllByUser_UserNoAndRoleCodeIn(
+        when(collabRepository.findAllByUser_UserNoAndRoleCodeInAndRecord_IsDeletedFalse(
                 userNo,
                 List.of(RoleCode.OWNER, RoleCode.EDITOR)
         )).thenReturn(List.of(ownerCollab, editorCollab));
@@ -175,11 +174,11 @@ class RecordServiceTest {
 
         when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
-        when(recordDayRepository.findByRecord_RecordNoOrderByTravelDateAsc(recordNo))
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
                 .thenReturn(List.of());
-        when(scheduleRepository.findByDay_Record_RecordNo(recordNo))
+        when(scheduleRepository.findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo))
                 .thenReturn(List.of());
-        when(todoRepository.findByDay_Record_RecordNoOrderByCreatedAtAsc(recordNo))
+        when(todoRepository.findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo))
                 .thenReturn(List.of());
 
 //        when
@@ -189,9 +188,9 @@ class RecordServiceTest {
         assertThat(detailResponseDto).isNotNull();
 
         verify(collabAuthorityService).checkViewable(recordNo, userNo);
-        verify(recordDayRepository).findByRecord_RecordNoOrderByTravelDateAsc(recordNo);
-        verify(scheduleRepository).findByDay_Record_RecordNo(recordNo);
-        verify(todoRepository).findByDay_Record_RecordNoOrderByCreatedAtAsc(recordNo);
+        verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        verify(scheduleRepository).findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo);
+        verify(todoRepository).findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
     }
 
     @Test
