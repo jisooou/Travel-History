@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RecordDayRepository extends JpaRepository<RecordDay, Integer> {
-    List<RecordDay> findByRecord_RecordNoOrderByTravelDateAsc(Integer recordNo);
+    List<RecordDay> findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(Integer recordNo);
 
     //    dayOrder 계산
     @Query("select max(r.dayOrder) from RecordDay r where r.record.recordNo = :recordNo")
