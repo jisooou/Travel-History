@@ -12,7 +12,7 @@ public interface CollabRepository extends JpaRepository<Collab, Integer> {
     Optional<Collab> findByRecord_RecordNoAndUser_UserNo(Integer recordNo, Integer userNo);
 
     //    어떤 사용자가 어떤 Record에 어떤 Role로 참여하는지 확인한다.
-    List<Collab> findAllByUser_UserNoAndRoleCodeIn(Integer userNo, List<RoleCode> roleCodes);
+    List<Collab> findAllByUser_UserNoAndRoleCodeInAndRecord_IsDeletedFalse(Integer userNo, List<RoleCode> roleCodes);
 
     boolean existsByRecord_RecordNoAndUser_UserNo(Integer recordNo, Integer userNo);
 

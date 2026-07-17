@@ -15,7 +15,7 @@ import java.util.List;
 public interface ScheduleRepository extends JpaRepository<SchedulePlace, Integer> {
     List<SchedulePlace> findByDay_DayNo(Integer dayNo);
 
-    List<SchedulePlace> findByDay_Record_RecordNo(Integer recordNo);
+    List<SchedulePlace> findByDay_Record_RecordNoAndRecord_IsDeletedFalse(Integer recordNo);
 
     List<SchedulePlace> findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(Integer dayNo);
 
