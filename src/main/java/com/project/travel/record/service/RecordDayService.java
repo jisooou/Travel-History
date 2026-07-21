@@ -11,10 +11,12 @@ import com.project.travel.record.repository.RecordDayRepository;
 import com.project.travel.record.repository.RecordRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,43 +32,58 @@ public class RecordDayService {
         Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
-//        dayOrder 계산
-        Integer nextDayOrder = recordDayRepository.findMaxDayOrderByRecordNo(recordNo)
-                .orElse(0) + 1;
-
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
                 .travelDate(requestDto.getTravelDate())
-                .dayOrder(nextDayOrder)
                 .build();
-        RecordDay savedRecordDay = recordDayRepository.save(recordDay);
-        return RecordDayResponseDto.from(savedRecordDay);
+        RecordDay savedRecordDay;
+
+        try {
+            savedRecordDay = recordDayRepository.saveAndFlush(recordDay);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.RECORD_DAY_DUPLICATED);
+        }
+
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        int dayOrder = generateDayOrderResponse(recordDays, recordDay);
+
+        return RecordDayResponseDto.from(
+                savedRecordDay,
+                dayOrder
+        );
     }
 
     public List<RecordDayResponseDto> getRecordDays(Integer userNo, Integer recordNo) {
         getAccessRecord(recordNo);
         collabAuthorityService.checkViewable(recordNo, userNo);
 
-        return recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo)
-                .stream()
-                .map(RecordDayResponseDto::from)
-                .toList();
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+
+        return getDayOrderResponse(recordDays);
     }
 
     @Transactional
     public RecordDayResponseDto updateRecordDay(Integer userNo, Integer dayNo, @Valid RecordDayRequestDto requestDto) {
+        RecordDay recordDay = getAccessRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkEditable(recordNo, userNo);
         try {
-            RecordDay recordDay = getAccessRecordDay(dayNo);
-            Integer recordNo = recordDay.getRecord().getRecordNo();
-
-            collabAuthorityService.checkEditable(recordNo, userNo);
-
             recordDay.update(requestDto);
             recordDayRepository.flush();
-            return RecordDayResponseDto.from(recordDay);
         } catch (ObjectOptimisticLockingFailureException e) {
             throw new CustomException(ErrorCode.RECORD_DAY_CONFLICT);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.RECORD_DAY_DUPLICATED);
         }
+
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        int dayOrder = generateDayOrderResponse(recordDays, recordDay);
+
+        return RecordDayResponseDto.from(
+                recordDay,
+                dayOrder
+        );
     }
 
     @Transactional
@@ -89,4 +106,20 @@ public class RecordDayService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND));
     }
 
+    private List<RecordDayResponseDto> getDayOrderResponse(List<RecordDay> recordDays) {
+        List<RecordDayResponseDto> result = new ArrayList<>();
+        for (int i = 0; i < recordDays.size(); i++) {
+            result.add(RecordDayResponseDto.from(recordDays.get(i), i + 1));
+        }
+        return result;
+    }
+
+    private int generateDayOrderResponse(List<RecordDay> recordDays, RecordDay recordDay){
+        for (int i = 0; i < recordDays.size(); i++) {
+            if (recordDays.get(i).getDayNo().equals(recordDay.getDayNo())) {
+                return i + 1;
+            }
+        }
+        throw new CustomException(ErrorCode.RECORD_DAY_NOT_FOUND);
+    }
 }

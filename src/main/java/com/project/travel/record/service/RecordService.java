@@ -11,6 +11,7 @@ import com.project.travel.record.dto.response.RecordDayResponseDto;
 import com.project.travel.record.dto.response.RecordDetailResponseDto;
 import com.project.travel.record.dto.response.RecordResponseDto;
 import com.project.travel.record.entity.Record;
+import com.project.travel.record.entity.RecordDay;
 import com.project.travel.record.repository.RecordDayRepository;
 import com.project.travel.record.repository.RecordRepository;
 import com.project.travel.schedule.dto.response.ScheduleResponseDto;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -78,20 +80,17 @@ public class RecordService {
 //        OWNER, EDITOR, VIEWR 모두 상세 조회가 가능하다.
         collabAuthorityService.checkViewable(recordNo, userNo);
 
-        List<RecordDayResponseDto> days = recordDayRepository
-                .findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo)
-                .stream()
-                .map(RecordDayResponseDto::from)
-                .toList();
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        List<RecordDayResponseDto> days = getDayOrderResponse(recordDays);
 
         List<ScheduleResponseDto> schedules = scheduleRepository
-                .findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo)
+                .findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo)
                 .stream()
                 .map(ScheduleResponseDto::from)
                 .toList();
 
         List<TodoResponseDto> todos = todoRepository
-                .findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo)
+                .findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo)
                 .stream()
                 .map(TodoResponseDto::from)
                 .toList();
@@ -125,5 +124,13 @@ public class RecordService {
     private Record getAccessRecord(Integer recordNo) {
         return recordRepository.findByRecordNoAndIsDeletedFalse(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));
+    }
+
+    private List<RecordDayResponseDto> getDayOrderResponse(List<RecordDay> recordDays) {
+        List<RecordDayResponseDto> result = new ArrayList<>();
+        for (int i = 0; i < recordDays.size(); i++) {
+            result.add(RecordDayResponseDto.from(recordDays.get(i), i + 1));
+        }
+        return result;
     }
 }
