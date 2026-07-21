@@ -114,7 +114,7 @@ public class RecordDayService {
         return result;
     }
 
-    private int generateDayOrderResponse(List<RecordDay> recordDays, RecordDay recordDay){
+    private int generateDayOrderResponse(List<RecordDay> recordDays, RecordDay recordDay) {
         for (int i = 0; i < recordDays.size(); i++) {
             if (recordDays.get(i).getDayNo().equals(recordDay.getDayNo())) {
                 return i + 1;
