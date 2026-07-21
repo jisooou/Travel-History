@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -121,12 +122,19 @@ public class ScheduleService {
 
         validateReorderRequest(requestDto, scheduleMap);
 
+        for (SchedulePlace schedulePlace : schedulePlaces) {
+            schedulePlace.updateSortOrder(-schedulePlace.getSortOrder());
+        }
+        scheduleRepository.flush();
+
         for (ScheduleOrderRequestDto orderRequestDto : requestDto.getSchedules()) {
             SchedulePlace schedulePlace = scheduleMap.get(orderRequestDto.getScheduleNo());
             schedulePlace.updateSortOrder(orderRequestDto.getSortOrder());
         }
+        scheduleRepository.flush();
 
         return schedulePlaces.stream()
+                .sorted(Comparator.comparing(SchedulePlace::getSortOrder))
                 .map(ScheduleResponseDto::from)
                 .toList();
     }
