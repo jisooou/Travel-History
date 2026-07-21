@@ -8,5 +8,5 @@ import java.util.List;
 public interface TodoRepository extends JpaRepository<Todo, Integer> {
     List<Todo> findByDay_DayNoOrderByCreatedAtAsc(Integer dayNo);
 
-    List<Todo> findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(Integer recordNo);
+    List<Todo> findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(Integer recordNo);
 }
