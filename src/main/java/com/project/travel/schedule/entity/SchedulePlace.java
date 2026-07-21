@@ -18,9 +18,6 @@ import java.time.LocalDateTime;
 @Table(
         comment = "일정 배치",
         name = "schedule_place",
-        indexes = {
-                @Index(name = "idx_schedule_day_time_sort", columnList = "DAY_NO, TIME_SLOT, SORT_ORDER")
-        },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_schedule_day_time_sort", columnNames = {"DAY_NO", "TIME_SLOT", "SORT_ORDER"})
         }
