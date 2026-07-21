@@ -17,8 +17,7 @@ import java.time.LocalDateTime;
         comment = "날짜",
         name = "record_day",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_record_day_date", columnNames = {"RECORD_NO", "TRAVEL_DATE"}),
-                @UniqueConstraint(name = "uk_record_day_order", columnNames = {"RECORD_NO", "DAY_ORDER"})
+                @UniqueConstraint(name = "uk_record_day_date", columnNames = {"RECORD_NO", "TRAVEL_DATE"})
         }
 )
 public class RecordDay {
@@ -39,9 +38,6 @@ public class RecordDay {
     @Column(name = "TRAVEL_DATE", nullable = false)
     private LocalDate travelDate;
 
-    @Column(name = "DAY_ORDER", nullable = false, comment = "1일차, 2일차...")
-    private Integer dayOrder;
-
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -50,10 +46,9 @@ public class RecordDay {
     private Integer version;
 
     @Builder
-    public RecordDay(Record record, LocalDate travelDate, Integer dayOrder) {
+    public RecordDay(Record record, LocalDate travelDate) {
         this.record = record;
         this.travelDate = travelDate;
-        this.dayOrder = dayOrder;
     }
 
     @PrePersist

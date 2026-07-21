@@ -16,13 +16,13 @@ public class RecordDayResponseDto {
     private LocalDate travelDate;
     private Integer dayOrder;
 
-    public static RecordDayResponseDto from(RecordDay recordDay) {
+    public static RecordDayResponseDto from(RecordDay recordDay, Integer dayOrder) {
         return RecordDayResponseDto.builder()
                 .dayNo(recordDay.getDayNo())
                 .recordNo(recordDay.getRecord().getRecordNo())
                 .recordName(recordDay.getRecord().getRecordName())
                 .travelDate(recordDay.getTravelDate())
-                .dayOrder(recordDay.getDayOrder())
+                .dayOrder(dayOrder)
                 .build();
     }
 }
