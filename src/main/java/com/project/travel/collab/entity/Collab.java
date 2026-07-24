@@ -76,6 +76,6 @@ public class Collab {
     }
 
     public boolean canView() {
-        return roleCode == RoleCode.VIEWER;
+        return roleCode == RoleCode.OWNER || roleCode == RoleCode.EDITOR || roleCode == RoleCode.VIEWER;
     }
 }
