@@ -262,7 +262,7 @@ public class InviteServiceTest {
                 .thenReturn(false);
 
 //        when
-        InviteResponseDto responseDto = inviteService.acceptInvite(userNo, email, inviteNo);
+        InviteResponseDto responseDto = inviteService.acceptInvite(userNo, inviteNo);
 
 //        then
         assertThat(responseDto.getInviteStatus()).isEqualTo(InviteStatus.ACCEPTED);
@@ -288,7 +288,7 @@ public class InviteServiceTest {
 
 //        when, then
         assertThatThrownBy(() ->
-                inviteService.acceptInvite(userNo, email, inviteNo))
+                inviteService.acceptInvite(userNo, inviteNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT.getMessage());
 
@@ -316,7 +316,7 @@ public class InviteServiceTest {
                 .thenReturn(Optional.of(inviteInfo));
 
 //        when
-        InviteResponseDto responseDto = inviteService.rejectInvite(userNo, email, inviteNo);
+        InviteResponseDto responseDto = inviteService.rejectInvite(userNo, inviteNo);
 
 //        then
         assertThat(responseDto.getInviteStatus()).isEqualTo(InviteStatus.REJECTED);
@@ -342,7 +342,7 @@ public class InviteServiceTest {
 
 //        when, then
         assertThatThrownBy(() ->
-                inviteService.acceptInvite(userNo, email, inviteNo))
+                inviteService.acceptInvite(userNo, inviteNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT.getMessage());
 
