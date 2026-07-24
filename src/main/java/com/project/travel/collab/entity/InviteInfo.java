@@ -40,7 +40,7 @@ public class InviteInfo {
     private String inviteEmail;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "INVITE_USER_NO")
+    @JoinColumn(name = "INVITE_USER_NO", nullable = false)
     private User inviteUser;
 
     @Enumerated(EnumType.STRING)
