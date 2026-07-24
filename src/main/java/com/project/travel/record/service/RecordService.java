@@ -108,7 +108,7 @@ public class RecordService {
         Record record = getAccessRecord(recordNo);
         collabAuthorityService.checkEditable(recordNo, userNo);
 
-        record.update(requestDto);
+        record.update(requestDto.getRecordName(), requestDto.getTravelType());
         return RecordResponseDto.from(record);
     }
 

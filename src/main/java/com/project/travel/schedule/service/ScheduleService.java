@@ -72,7 +72,7 @@ public class ScheduleService {
         Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
         collabAuthorityService.checkEditable(recordNo, userNo);
 
-        schedulePlace.update(requestDto, place);
+        schedulePlace.update(place, requestDto.getTimeSlot());
         return ScheduleResponseDto.from(schedulePlace);
     }
 

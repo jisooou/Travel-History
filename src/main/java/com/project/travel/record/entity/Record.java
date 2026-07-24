@@ -1,7 +1,6 @@
 package com.project.travel.record.entity;
 
 import com.project.travel.converter.UUIDConverter;
-import com.project.travel.record.dto.request.RecordRequestDto;
 import com.project.travel.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -66,9 +65,9 @@ public class Record {
     }
 
     //    책임1: Record update
-    public void update(RecordRequestDto requestDto) {
-        this.recordName = requestDto.getRecordName();
-        this.travelType = requestDto.getTravelType();
+    public void update(String recordName, TravelType travelType) {
+        this.recordName = recordName;
+        this.travelType = travelType;
     }
 
     //    책임2: Record delete

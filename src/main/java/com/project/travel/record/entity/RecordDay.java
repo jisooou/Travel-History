@@ -59,7 +59,7 @@ public class RecordDay {
     }
 
     //    책임1 : RecordDay update
-    public void update(RecordDayRequestDto requestDto) {
-        this.travelDate = requestDto.getTravelDate();
+    public void update(LocalDate travelDate) {
+        this.travelDate = travelDate;
     }
 }

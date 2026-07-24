@@ -69,7 +69,7 @@ public class RecordDayService {
 
         collabAuthorityService.checkEditable(recordNo, userNo);
         try {
-            recordDay.update(requestDto);
+            recordDay.update(requestDto.getTravelDate());
             recordDayRepository.flush();
         } catch (ObjectOptimisticLockingFailureException e) {
             throw new CustomException(ErrorCode.RECORD_DAY_CONFLICT);

@@ -78,9 +78,9 @@ public class SchedulePlace {
     }
 
     //    책임1 : Schedule update
-    public void update(ScheduleRequestDto requestDto, Place place) {
+    public void update(Place place, TimeSlot timeSlot) {
         this.place = place;
-        this.timeSlot = requestDto.getTimeSlot();
+        this.timeSlot = timeSlot;
     }
 
     //    Schedule 재정렬을 위해 sortOrder만 변경
