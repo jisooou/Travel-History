@@ -365,7 +365,6 @@ public class TodoServiceTest {
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
                 .travelDate(LocalDate.of(2026, 1, 1))
-                .dayOrder(1)
                 .build();
         ReflectionTestUtils.setField(recordDay, "dayNo", dayNo);
         return recordDay;
