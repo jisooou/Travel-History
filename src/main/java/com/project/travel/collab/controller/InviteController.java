@@ -30,7 +30,7 @@ public class InviteController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer inviteNo
     ) {
-        return ApiResponse.success(inviteService.acceptInvite(userDetails.getUserNo(), userDetails.getEmail(), inviteNo));
+        return ApiResponse.success(inviteService.acceptInvite(userDetails.getUserNo(), inviteNo));
     }
 
     @PostMapping("/invites/{inviteNo}/reject")
@@ -38,6 +38,6 @@ public class InviteController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer inviteNo
     ) {
-        return ApiResponse.success(inviteService.rejectInvite(userDetails.getUserNo(), userDetails.getEmail(), inviteNo));
+        return ApiResponse.success(inviteService.rejectInvite(userDetails.getUserNo(), inviteNo));
     }
 }

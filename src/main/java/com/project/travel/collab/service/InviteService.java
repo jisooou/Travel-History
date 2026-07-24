@@ -66,14 +66,14 @@ public class InviteService {
     }
 
     @Transactional
-    public InviteResponseDto acceptInvite(Integer userNo, String email, Integer inviteNo) {
+    public InviteResponseDto acceptInvite(Integer userNo, Integer inviteNo) {
         User user = userRepository.findById(userNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         InviteInfo inviteInfo = inviteInfoRepository.findByInviteNoAndStatus(inviteNo, InviteStatus.PENDING)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT));
-//        if (!inviteInfo.getInviteEmail().equals(email)) {
-//            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
-//        }
+        if (!inviteInfo.getInviteEmail().equals(user.getEmail())) {
+            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
+        }
 
 //        이미 참여중인지 확인한다.
         Integer recordNo = inviteInfo.getRecord().getRecordNo();
@@ -93,14 +93,14 @@ public class InviteService {
     }
 
     @Transactional
-    public InviteResponseDto rejectInvite(Integer userNo, String email, Integer inviteNo) {
+    public InviteResponseDto rejectInvite(Integer userNo, Integer inviteNo) {
         User user = userRepository.findById(userNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         InviteInfo inviteInfo = inviteInfoRepository.findByInviteNoAndStatus(inviteNo, InviteStatus.PENDING)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT));
-//        if (!inviteInfo.getInviteEmail().equals(email)) {
-//            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
-//        }
+        if (!inviteInfo.getInviteEmail().equals(user.getEmail())) {
+            throw new CustomException(ErrorCode.INVITE_STATUS_DIFFERENT_EMAIL);
+        }
 
         inviteInfo.reject();
         return InviteResponseDto.from(inviteInfo);
