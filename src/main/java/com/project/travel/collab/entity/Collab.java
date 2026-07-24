@@ -48,7 +48,7 @@ public class Collab {
     private LocalDateTime createdAt;
 
     @Column(name = "IS_DELETED", nullable = false)
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @Builder
     public Collab(Record record, User user, RoleCode roleCode) {

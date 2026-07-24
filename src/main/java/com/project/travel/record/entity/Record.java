@@ -46,7 +46,7 @@ public class Record {
     private LocalDateTime createdAt;
 
     @Column(name = "IS_DELETED", nullable = false)
-    private Boolean isDeleted = false;
+    private boolean isDeleted = false;
 
     @Builder
     public Record(User owner, String recordName, TravelType travelType) {
