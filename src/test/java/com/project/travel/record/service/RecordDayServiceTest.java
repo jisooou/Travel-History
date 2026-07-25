@@ -52,33 +52,35 @@ public class RecordDayServiceTest {
                 LocalDate.of(2026, 1, 1)
         );
 
-        RecordDay savedRecordDay = createRecordDay(
+        RecordDay day1 = createRecordDay(
                 record,
                 1,
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
 
-        when(recordRepository.findById(recordNo))
+        RecordDay day2 = createRecordDay(
+                record,
+                2,
+                LocalDate.of(2026, 1, 2)
+        );
+
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
-
-        when(recordDayRepository.findMaxDayOrderByRecordNo(recordNo))
-                .thenReturn(Optional.empty());
-
-        when(recordDayRepository.save(any(RecordDay.class)))
-                .thenReturn(savedRecordDay);
+        when(recordDayRepository.saveAndFlush(any(RecordDay.class)))
+                .thenReturn(day2);
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
+                .thenReturn(List.of(day1, day2));
 
 //        when
         RecordDayResponseDto responseDto = recordDayService.createRecordDay(userNo, recordNo, requestDto);
 
 //        then
-        assertThat(responseDto.getDayNo()).isEqualTo(1);
-        assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 1));
-        assertThat(responseDto.getDayOrder()).isEqualTo(1);
+        assertThat(responseDto.getDayNo()).isEqualTo(2);
+        assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
+        assertThat(responseDto.getDayOrder()).isEqualTo(2);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
-        verify(recordDayRepository).findMaxDayOrderByRecordNo(recordNo);
-        verify(recordDayRepository).save(any(RecordDay.class));
+        verify(recordDayRepository).saveAndFlush(any(RecordDay.class));
     }
 
     @Test
@@ -95,19 +97,24 @@ public class RecordDayServiceTest {
                 LocalDate.of(2026, 1, 2)
         );
 
+        RecordDay comparedRecordDay = createRecordDay(
+                record,
+                1,
+                LocalDate.of(2026, 1, 1)
+        );
+
         RecordDay savedRecordDay = createRecordDay(
                 record,
                 2,
-                LocalDate.of(2026, 1, 2),
-                2
+                LocalDate.of(2026, 1, 2)
         );
 
-        when(recordRepository.findById(recordNo))
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
-        when(recordDayRepository.findMaxDayOrderByRecordNo(recordNo))
-                .thenReturn(Optional.of(1));
-        when(recordDayRepository.save(any(RecordDay.class)))
+        when(recordDayRepository.saveAndFlush(any(RecordDay.class)))
                 .thenReturn(savedRecordDay);
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
+                .thenReturn(List.of(comparedRecordDay, savedRecordDay));
 
 //        when
         RecordDayResponseDto responseDto = recordDayService.createRecordDay(userNo, recordNo, requestDto);
@@ -117,8 +124,7 @@ public class RecordDayServiceTest {
         assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
-        verify(recordDayRepository).findMaxDayOrderByRecordNo(recordNo);
-        verify(recordDayRepository).save(any(RecordDay.class));
+        verify(recordDayRepository).saveAndFlush(any(RecordDay.class));
     }
 
     @Test
@@ -132,7 +138,7 @@ public class RecordDayServiceTest {
                 LocalDate.of(2026, 1, 1)
         );
 
-        when(recordRepository.findById(recordNo))
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.empty());
 
 //        when, then
@@ -157,17 +163,15 @@ public class RecordDayServiceTest {
         RecordDay day1 = createRecordDay(
                 record,
                 1,
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
         RecordDay day2 = createRecordDay(
                 record,
                 2,
-                LocalDate.of(2026, 1, 2),
-                2
+                LocalDate.of(2026, 1, 2)
         );
 
-        when(recordRepository.findById(recordNo))
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.of(record));
         when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
                 .thenReturn(List.of(day1, day2));
@@ -183,6 +187,9 @@ public class RecordDayServiceTest {
                         LocalDate.of(2026, 1, 1),
                         LocalDate.of(2026, 1, 2)
                 );
+        assertThat(responseDtos)
+                .extracting(RecordDayResponseDto::getDayOrder)
+                .containsExactly(1, 2);
 
         verify(collabAuthorityService).checkViewable(recordNo, userNo);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
@@ -195,7 +202,7 @@ public class RecordDayServiceTest {
         Integer userNo = 1;
         Integer recordNo = 999;
 
-        when(recordRepository.findById(recordNo))
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
                 .thenReturn(Optional.empty());
 
 //        when, then
@@ -218,25 +225,31 @@ public class RecordDayServiceTest {
 
         User user = createUser();
         Record record = createRecord(user, recordNo, "제주 여행", TravelType.DOMESTIC);
-        RecordDay recordDay = createRecordDay(
+        RecordDay day1 = createRecordDay(
                 record,
-                dayNo,
-                LocalDate.of(2026, 1, 1),
-                1
+                1,
+                LocalDate.of(2026, 1, 1)
+        );
+        RecordDay day2 = createRecordDay(
+                record,
+                2,
+                LocalDate.of(2026, 1, 2)
         );
         RecordDayRequestDto requestDto = createRecordDayRequest(
-                LocalDate.of(2026, 1, 2)
+                LocalDate.of(2026, 1, 3)
         );
 
         when(recordDayRepository.findById(dayNo))
-                .thenReturn(Optional.of(recordDay));
+                .thenReturn(Optional.of(day1));
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
+                .thenReturn(List.of(day2, day1));
 
 //        when
         RecordDayResponseDto responseDto = recordDayService.updateRecordDay(userNo, dayNo, requestDto);
 
 //        then
-        assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
-        assertThat(responseDto.getDayOrder()).isEqualTo(1);
+        assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 3));
+        assertThat(responseDto.getDayOrder()).isEqualTo(2);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
     }
@@ -277,8 +290,7 @@ public class RecordDayServiceTest {
         RecordDay recordDay = createRecordDay(
                 record,
                 dayNo,
-                LocalDate.of(2026, 1, 1),
-                1
+                LocalDate.of(2026, 1, 1)
         );
 
         when(recordDayRepository.findById(dayNo))
@@ -330,11 +342,10 @@ public class RecordDayServiceTest {
         return record;
     }
 
-    private RecordDay createRecordDay(Record record, Integer dayNo, LocalDate travelDate, Integer dayOrder) {
+    private RecordDay createRecordDay(Record record, Integer dayNo, LocalDate travelDate) {
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
                 .travelDate(travelDate)
-                .dayOrder(dayOrder)
                 .build();
         ReflectionTestUtils.setField(recordDay, "dayNo", dayNo);
         return recordDay;
