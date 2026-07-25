@@ -45,7 +45,7 @@ public class RecordDayService {
         }
 
         List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
-        int dayOrder = generateDayOrderResponse(recordDays, recordDay);
+        int dayOrder = generateDayOrderResponse(recordDays, savedRecordDay);
 
         return RecordDayResponseDto.from(
                 savedRecordDay,
