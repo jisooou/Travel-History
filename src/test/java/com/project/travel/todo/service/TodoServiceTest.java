@@ -58,7 +58,7 @@ public class TodoServiceTest {
         Record record = createRecord(user, recordNo);
         RecordDay recordDay = createRecordDay(record, dayNo);
 
-        TodoCreateRequestDto requestDto = createTodoCreateRequest(dayNo, "모자 챙기기");
+        TodoCreateRequestDto requestDto = createTodoCreateRequest("모자 챙기기");
         Todo savedTodo = createTodo(todoNo, recordDay, user, "모자 챙기기", Todo.CompletedStatus.NOT_DONE);
 
         when(recordDayRepository.findById(dayNo))
@@ -88,7 +88,7 @@ public class TodoServiceTest {
         Integer userNo = 1;
         Integer dayNo = 999;
 
-        TodoCreateRequestDto requestDto = createTodoCreateRequest(dayNo, "모자 챙기기");
+        TodoCreateRequestDto requestDto = createTodoCreateRequest("모자 챙기기");
 
         when(recordDayRepository.findById(dayNo))
                 .thenReturn(Optional.empty());
@@ -171,7 +171,7 @@ public class TodoServiceTest {
         RecordDay recordDay = createRecordDay(record, dayNo);
         Todo todo = createTodo(todoNo, recordDay, user, "모자 챙기기", Todo.CompletedStatus.NOT_DONE);
 
-        TodoCreateRequestDto requestDto = createTodoCreateRequest(dayNo, "여권 챙기기");
+        TodoCreateRequestDto requestDto = createTodoCreateRequest("여권 챙기기");
 
         when(todoRepository.findById(todoNo))
                 .thenReturn(Optional.of(todo));
@@ -193,7 +193,7 @@ public class TodoServiceTest {
         Integer userNo = 1;
         Integer todoNo = 999;
 
-        TodoCreateRequestDto requestDto = createTodoCreateRequest(1, "여권 챙기기");
+        TodoCreateRequestDto requestDto = createTodoCreateRequest("여권 챙기기");
 
         when(todoRepository.findById(todoNo))
                 .thenReturn(Optional.empty());
@@ -321,7 +321,7 @@ public class TodoServiceTest {
         RecordDay recordDay = createRecordDay(record, dayNo);
         Todo todo = createTodo(todoNo, recordDay, user, "여권 챙기기", Todo.CompletedStatus.NOT_DONE);
 
-        TodoCreateRequestDto requestDto = createTodoCreateRequest(dayNo, "모자 챙기기");
+        TodoCreateRequestDto requestDto = createTodoCreateRequest("모자 챙기기");
 
         when(todoRepository.findById(todoNo))
                 .thenReturn(Optional.of(todo));
@@ -385,10 +385,9 @@ public class TodoServiceTest {
         return todo;
     }
 
-    private TodoCreateRequestDto createTodoCreateRequest(Integer dayNo, String todoContent) {
+    private TodoCreateRequestDto createTodoCreateRequest(String todoContent) {
         TodoCreateRequestDto requestDto = new TodoCreateRequestDto();
 
-        ReflectionTestUtils.setField(requestDto, "dayNo", dayNo);
         ReflectionTestUtils.setField(requestDto, "todoContent", todoContent);
         return requestDto;
     }
