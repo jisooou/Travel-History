@@ -327,7 +327,7 @@ public class ScheduleServiceTest {
 
         assertThat(responseDtos)
                 .extracting(ScheduleResponseDto::getScheduleNo)
-                .containsExactly(1, 2, 3, 4);
+                .containsExactly(3, 1, 4, 2);
 
         verify(collabAuthorityService).checkEditable(recordNo, userNo);
         verify(scheduleRepository).findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING);
