@@ -8,9 +8,6 @@ import lombok.Getter;
 
 @Getter
 public class TodoCreateRequestDto {
-    @NotNull
-    private Integer dayNo;
-
     @NotBlank(message = "할일을 작성해 주세요.")
     @Size(max = 255)
     private String todoContent;
