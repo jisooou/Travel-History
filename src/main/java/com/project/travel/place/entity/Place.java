@@ -52,10 +52,10 @@ public class Place {
     @Column(name = "LONGITUDE", precision = 10, scale = 8, nullable = false)
     private BigDecimal longitude;
 
-    @Column(name = "MAP_SOURCE", length = 30)
+    @Column(name = "MAP_SOURCE", length = 30, nullable = false)
     private String mapSource;
 
-    @Column(name = "MAP_PLACE_ID", length = 255)
+    @Column(name = "MAP_PLACE_ID", length = 255, nullable = false)
     private String mapPlaceId;
 
     @Column(name = "IMAGE_URL", length = 500)
