@@ -79,7 +79,7 @@ class RecordServiceTest {
 
         Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
 
-        when(userRepository.findById(userNo))
+        when(userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE))
                 .thenReturn(Optional.of(user));
         when(recordRepository.save(any(Record.class)))
                 .thenReturn(savedRecord);
@@ -105,7 +105,7 @@ class RecordServiceTest {
 
         Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
 
-        when(userRepository.findById(userNo))
+        when(userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE))
                 .thenReturn(Optional.of(user));
         when(recordRepository.save(any(Record.class)))
                 .thenReturn(savedRecord);
@@ -176,9 +176,9 @@ class RecordServiceTest {
                 .thenReturn(Optional.of(record));
         when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
                 .thenReturn(List.of());
-        when(scheduleRepository.findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo))
+        when(scheduleRepository.findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo))
                 .thenReturn(List.of());
-        when(todoRepository.findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo))
+        when(todoRepository.findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo))
                 .thenReturn(List.of());
 
 //        when
@@ -189,8 +189,8 @@ class RecordServiceTest {
 
         verify(collabAuthorityService).checkViewable(recordNo, userNo);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
-        verify(scheduleRepository).findByDay_Record_RecordNoAndRecord_IsDeletedFalse(recordNo);
-        verify(todoRepository).findByDay_Record_RecordNoAndRecord_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
+        verify(scheduleRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo);
+        verify(todoRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
     }
 
     @Test
