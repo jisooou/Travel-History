@@ -44,7 +44,7 @@ public class RecordService {
 
     @Transactional
     public RecordResponseDto createRecord(Integer userNo, @Valid RecordRequestDto requestDto) {
-        User user = userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.INACTIVE)
+        User user = userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         Record record = Record.builder()
                 .owner(user)
