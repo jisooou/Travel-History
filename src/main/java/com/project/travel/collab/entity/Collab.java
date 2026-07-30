@@ -1,5 +1,6 @@
 package com.project.travel.collab.entity;
 
+import com.project.travel.converter.UUIDConverter;
 import com.project.travel.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -30,6 +31,7 @@ public class Collab {
     private Integer collabNo;
 
     @Column(name = "COLLAB_UUID", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+    @Convert(converter = UUIDConverter.class)
     private UUID collabUUID;
 
     @ManyToOne(fetch = FetchType.LAZY)
