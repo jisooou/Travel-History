@@ -76,4 +76,12 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public ParsedToken parsedToken(String token) {
+        Claims claims = parseClaims(token);
+        Integer userNo = Integer.valueOf(claims.getSubject());
+        long remainingExpiration = claims.getExpiration().getTime() - System.currentTimeMillis();
+
+        return new ParsedToken(userNo, remainingExpiration);
+    }
 }
