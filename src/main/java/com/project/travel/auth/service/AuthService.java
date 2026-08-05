@@ -4,6 +4,7 @@ import com.project.travel.auth.dto.request.AuthLoginRequestDto;
 import com.project.travel.auth.dto.request.RefreshRequestDto;
 import com.project.travel.auth.dto.response.AuthLoginResponseDto;
 import com.project.travel.auth.jwt.JwtProvider;
+import com.project.travel.auth.jwt.ParsedToken;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.user.entity.User;
@@ -85,10 +86,8 @@ public class AuthService {
 
     @Transactional
     public void logout(String accessToken) {
-        jwtProvider.validateToken(accessToken);
-        Integer userNo = jwtProvider.getUserNo(accessToken);
-        tokenRedisService.deleteRefreshToken(userNo);
-        long remainingMs = jwtProvider.getRemainingExpiration(accessToken);
-        tokenRedisService.addToBlacklist(accessToken, remainingMs);
+        ParsedToken parsedToken = jwtProvider.parsedToken(accessToken);
+        tokenRedisService.deleteRefreshToken(parsedToken.userNo());
+        tokenRedisService.addToBlacklist(accessToken, parsedToken.remainingExpiration());
     }
 }
