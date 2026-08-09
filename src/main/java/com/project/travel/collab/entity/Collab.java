@@ -68,16 +68,4 @@ public class Collab {
             this.createdAt = LocalDateTime.now();
         }
     }
-
-    public boolean isOwner() {
-        return roleCode == RoleCode.OWNER;
-    }
-
-    public boolean canEdit() {
-        return roleCode == RoleCode.OWNER || roleCode == RoleCode.EDITOR;
-    }
-
-    public boolean canView() {
-        return roleCode == RoleCode.OWNER || roleCode == RoleCode.EDITOR || roleCode == RoleCode.VIEWER;
-    }
 }
