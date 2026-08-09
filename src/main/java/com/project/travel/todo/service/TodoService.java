@@ -36,7 +36,7 @@ public class TodoService {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         User writer = userRepository.findById(userNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -52,11 +52,23 @@ public class TodoService {
         return TodoResponseDto.from(savedTodo);
     }
 
-    public List<TodoResponseDto> getTodoOfDay(Integer userNo, Integer dayNo) {
+    public List<TodoResponseDto> getUserTodoOfDay(Integer userNo, Integer dayNo) {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkViewable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+
+        return todoRepository.findByDay_DayNoOrderByCreatedAtAsc(dayNo)
+                .stream()
+                .map(TodoResponseDto::from)
+                .toList();
+    }
+
+    public List<TodoResponseDto> getGuestTodoOfDay(Integer dayNo, String joinCode) {
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkGuest(recordNo, joinCode);
 
         return todoRepository.findByDay_DayNoOrderByCreatedAtAsc(dayNo)
                 .stream()
@@ -70,7 +82,7 @@ public class TodoService {
             Todo todo = getAccessTodo(todoNo);
             Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-            collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
             todo.updateContent(createRequestDto.getTodoContent());
             todoRepository.flush();
@@ -86,7 +98,7 @@ public class TodoService {
             Todo todo = getAccessTodo(todoNo);
             Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-            collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
             todo.updateStatus(requestDto.getCompletedStatus());
             todoRepository.flush();
@@ -102,7 +114,7 @@ public class TodoService {
             Todo todo = getAccessTodo(todoNo);
             Integer recordNo = todo.getDay().getRecord().getRecordNo();
 
-            collabAuthorityService.checkEditable(recordNo, userNo);
+            collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
             todoRepository.delete(todo);
             todoRepository.flush();

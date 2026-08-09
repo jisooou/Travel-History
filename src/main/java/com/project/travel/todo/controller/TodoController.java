@@ -30,13 +30,23 @@ public class TodoController {
         return ApiResponse.success(todoService.createTodo(userDetails.getUserNo(), dayNo, createRequestDto));
     }
 
+    //    회원용
     //    특정 날짜 투두 조회
     @GetMapping("/days/{dayNo}")
-    public ApiResponse<List<TodoResponseDto>> getTodoOfDay(
+    public ApiResponse<List<TodoResponseDto>> getUserTodoOfDay(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer dayNo
     ) {
-        return ApiResponse.success(todoService.getTodoOfDay(userDetails.getUserNo(), dayNo));
+        return ApiResponse.success(todoService.getUserTodoOfDay(userDetails.getUserNo(), dayNo));
+    }
+
+    //    비회원용
+    @GetMapping("/guest/days/{dayNo}")
+    public ApiResponse<List<TodoResponseDto>> getGuestTodoOfDay(
+            @PathVariable Integer dayNo,
+            @RequestParam String joinCode
+    ) {
+        return ApiResponse.success(todoService.getGuestTodoOfDay(dayNo, joinCode));
     }
 
     @PatchMapping("/{todoNo}")
