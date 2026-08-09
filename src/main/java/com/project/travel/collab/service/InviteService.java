@@ -40,10 +40,7 @@ public class InviteService {
             throw new CustomException(ErrorCode.USER_ALREADY_EXIST);
         }
 //        Owner인지 확인한다.
-        collabAuthorityService.checkOwner(recordNo, userNo);
-        if (requestDto.getInviteRole() == RoleCode.OWNER) {
-            throw new CustomException(ErrorCode.INVITE_INVALID_AUTHORITY_OWNER);
-        }
+        collabAuthorityService.checkMemberOwner(recordNo, userNo);
 
 //        보류중인 InviteStatus를 확인한다.
         boolean isPending = inviteInfoRepository.existsByRecord_RecordNoAndInviteEmailAndStatus(

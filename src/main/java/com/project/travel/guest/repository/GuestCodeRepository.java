@@ -13,4 +13,6 @@ public interface GuestCodeRepository extends JpaRepository<GuestCode, Integer> {
     List<GuestCode> findAllByRecord_RecordNoAndIsActive(Integer recordNo, CodeActiveStatus codeActiveStatus);
 
     boolean existsByJoinCode(String joinCode);
+
+    boolean existsByRecord_RecordNoAndJoinCodeAndIsActive(Integer recordNo, String joinCode, CodeActiveStatus codeActiveStatus);
 }

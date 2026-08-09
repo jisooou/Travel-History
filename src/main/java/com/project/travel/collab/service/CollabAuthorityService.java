@@ -1,10 +1,12 @@
 package com.project.travel.collab.service;
 
-import com.project.travel.collab.entity.Collab;
 import com.project.travel.collab.entity.RoleCode;
 import com.project.travel.collab.repository.CollabRepository;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
+import com.project.travel.guest.entity.CodeActiveStatus;
+import com.project.travel.guest.repository.GuestCodeRepository;
+import com.project.travel.record.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,38 +14,36 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CollabAuthorityService {
     private final CollabRepository collabRepository;
+    private final RecordRepository recordRepository;
+    private final GuestCodeRepository guestCodeRepository;
 
-    //    RoleCode에 따른 역할 분리를 위한 중요한 Service
-
-    //    Owner 권한 확인
-    public void checkOwner(Integer recordNo, Integer userNo) {
-        boolean isOwner = collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
-                recordNo,
-                userNo,
-                RoleCode.OWNER
-        );
-
+    public void checkMemberOwner(Integer recordNo, Integer userNo) {
+        boolean isOwner = recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo);
         if (!isOwner) {
             throw new CustomException(ErrorCode.COLLAB_AUTHORITY_OWNER);
         }
     }
 
-    //    Editor 권한 확인
-    public void checkEditable(Integer recordNo, Integer userNo) {
-//        수정을 할 수 있는가? 해당 record에 초대가 되었는가?
-        Collab collab = collabRepository.findByRecord_RecordNoAndUser_UserNo(recordNo, userNo)
-                .orElseThrow(() -> new CustomException(ErrorCode.RECORD_ACCESS_DENIED));
+    public void checkMemberEditor(Integer recordNo, Integer userNo) {
+        boolean isOwner = recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo);
+        if (isOwner) {
+            return;
+        }
 
-        if (!collab.canEdit()) {
+        boolean isEditor = collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+                recordNo, userNo, RoleCode.EDITOR
+        );
+        if (!isEditor) {
             throw new CustomException(ErrorCode.COLLAB_AUTHORITY_EDITOR);
         }
     }
 
-    //    Viewer 권한 확인
-    public void checkViewable(Integer recordNo, Integer userNo) {
-        boolean canView = collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, userNo);
+    public void checkGuest(Integer recordNo, String joinCode) {
+        boolean isViewer = guestCodeRepository.existsByRecord_RecordNoAndJoinCodeAndIsActive(
+                recordNo, joinCode, CodeActiveStatus.ACTIVE
+        );
 
-        if (!canView) {
+        if (!isViewer) {
             throw new CustomException(ErrorCode.COLLAB_AUTHORITY_VIEWER);
         }
     }
