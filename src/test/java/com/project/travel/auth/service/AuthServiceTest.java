@@ -4,6 +4,7 @@ import com.project.travel.auth.dto.request.AuthLoginRequestDto;
 import com.project.travel.auth.dto.request.RefreshRequestDto;
 import com.project.travel.auth.dto.response.AuthLoginResponseDto;
 import com.project.travel.auth.jwt.JwtProvider;
+import com.project.travel.auth.jwt.ParsedToken;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
 import com.project.travel.user.entity.User;
@@ -127,7 +128,7 @@ public class AuthServiceTest {
                 .thenReturn(userNo);
         when(tokenRedisService.getRefreshToken(userNo))
                 .thenReturn(oldRefreshToken);
-        when(userRepository.findById(userNo))
+        when(userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE))
                 .thenReturn(Optional.of(user));
         when(jwtProvider.createAccessToken(userNo, email))
                 .thenReturn(newAccessToken);
@@ -216,19 +217,18 @@ public class AuthServiceTest {
 //        given
         Integer userNo = 1;
         String accessToken = "access-token";
-        Long remainingMs = 1000L;
+        long remainingMs = 1000L;
 
-        when(jwtProvider.validateToken(accessToken))
-                .thenReturn(true);
-        when(jwtProvider.getUserNo(accessToken))
-                .thenReturn(userNo);
-        when(jwtProvider.getRemainingExpiration(accessToken))
-                .thenReturn(remainingMs);
+        ParsedToken parsedToken = new ParsedToken(userNo, remainingMs);
+
+        when(jwtProvider.parsedToken(accessToken))
+                .thenReturn(parsedToken);
 
 //        when
         authService.logout(accessToken);
 
 //        then
+        verify(jwtProvider).parsedToken(accessToken);
         verify(tokenRedisService).deleteRefreshToken(userNo);
         verify(tokenRedisService).addToBlacklist(accessToken, remainingMs);
     }
