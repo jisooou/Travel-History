@@ -39,7 +39,7 @@ public class ScheduleService {
         Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
 
         Integer recordNo = recordDay.getRecord().getRecordNo();
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         SchedulePlace schedulePlace = SchedulePlace.builder()
                 .day(recordDay)
@@ -51,11 +51,23 @@ public class ScheduleService {
         return ScheduleResponseDto.from(savedSchedulePlace);
     }
 
-    public List<ScheduleResponseDto> getScheduleOfDay(Integer userNo, Integer dayNo) {
+    public List<ScheduleResponseDto> getUserScheduleOfDay(Integer userNo, Integer dayNo) {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkViewable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+
+        return scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo)
+                .stream()
+                .map(ScheduleResponseDto::from)
+                .toList();
+    }
+
+    public List<ScheduleResponseDto> getGuestScheduleOfDay(Integer dayNo, String joinCode) {
+        RecordDay recordDay = getRecordDay(dayNo);
+        Integer recordNo = recordDay.getRecord().getRecordNo();
+
+        collabAuthorityService.checkGuest(recordNo, joinCode);
 
         return scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo)
                 .stream()
@@ -70,7 +82,7 @@ public class ScheduleService {
         Place place = checkPlaceInSameRecord(requestDto.getPlaceNo(), recordDay);
 
         Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         schedulePlace.update(place, requestDto.getTimeSlot());
         return ScheduleResponseDto.from(schedulePlace);
@@ -80,7 +92,7 @@ public class ScheduleService {
     public void deleteScheduleOfDay(Integer userNo, Integer scheduleNo) {
         SchedulePlace schedulePlace = getAccessSchedule(scheduleNo);
         Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         scheduleRepository.delete(schedulePlace);
     }
@@ -109,7 +121,7 @@ public class ScheduleService {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         List<SchedulePlace> schedulePlaces = scheduleRepository.findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, requestDto.getTimeSlot());
 

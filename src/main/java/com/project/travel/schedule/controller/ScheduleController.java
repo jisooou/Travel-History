@@ -29,12 +29,22 @@ public class ScheduleController {
         return ApiResponse.success(scheduleService.createSchedule(userDetails.getUserNo(), dayNo, requestDto));
     }
 
+    //    회원용
     @GetMapping("/days/{dayNo}")
-    public ApiResponse<List<ScheduleResponseDto>> getScheduleOfDay(
+    public ApiResponse<List<ScheduleResponseDto>> getUserScheduleOfDay(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer dayNo
     ) {
-        return ApiResponse.success(scheduleService.getScheduleOfDay(userDetails.getUserNo(), dayNo));
+        return ApiResponse.success(scheduleService.getUserScheduleOfDay(userDetails.getUserNo(), dayNo));
+    }
+
+    //    비회원용
+    @GetMapping("/guest/days/{dayNo}")
+    public ApiResponse<List<ScheduleResponseDto>> getGuestScheduleOfDay(
+            @PathVariable Integer dayNo,
+            @RequestParam String joinCode
+    ) {
+        return ApiResponse.success(scheduleService.getGuestScheduleOfDay(dayNo, joinCode));
     }
 
     @PatchMapping("/{scheduleNo}")
