@@ -77,7 +77,7 @@ public class TodoServiceTest {
         assertThat(responseDto.getWriterNo()).isEqualTo(userNo);
         assertThat(responseDto.getTodoContent()).isEqualTo("모자 챙기기");
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).save(any(Todo.class));
     }
 
@@ -99,14 +99,14 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(userRepository, never()).findById(anyInt());
         verify(todoRepository, never()).save(any(Todo.class));
     }
 
     @Test
-    @DisplayName("Todo 조회에 성공한다")
-    void get_todo_success() {
+    @DisplayName("회원 Todo 조회에 성공한다")
+    void get_user_todo_success() {
 //        given
         Integer userNo = 1;
         Integer recordNo = 1;
@@ -125,7 +125,7 @@ public class TodoServiceTest {
                 .thenReturn(List.of(todo1, todo2));
 
 //        when
-        List<TodoResponseDto> responseDtos = todoService.getTodoOfDay(userNo, dayNo);
+        List<TodoResponseDto> responseDtos = todoService.getUserTodoOfDay(userNo, dayNo);
 
 //        then
         assertThat(responseDtos).hasSize(2);
@@ -133,7 +133,7 @@ public class TodoServiceTest {
                 .extracting(TodoResponseDto::getTodoContent)
                 .containsExactly("모자 챙기기", "여권 챙기기");
 
-        verify(collabAuthorityService).checkViewable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).findByDay_DayNoOrderByCreatedAtAsc(dayNo);
     }
 
@@ -149,12 +149,46 @@ public class TodoServiceTest {
 
 //        when, then
         assertThatThrownBy(() ->
-                todoService.getTodoOfDay(userNo, dayNo))
+                todoService.getUserTodoOfDay(userNo, dayNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkViewable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(todoRepository, never()).findByDay_DayNoOrderByCreatedAtAsc(anyInt());
+    }
+
+    @Test
+    @DisplayName("비회원 Todo 조회에 성공한다")
+    void get_guest_todo_success() {
+//        given
+        Integer userNo = 1;
+        Integer recordNo = 1;
+        Integer dayNo = 1;
+        String joinCode = "ABCD1234";
+
+        User user = createUser(userNo);
+        Record record = createRecord(user, recordNo);
+        RecordDay recordDay = createRecordDay(record, dayNo);
+
+        Todo todo1 = createTodo(1, recordDay, user, "모자 챙기기", Todo.CompletedStatus.NOT_DONE);
+        Todo todo2 = createTodo(2, recordDay, user, "여권 챙기기", Todo.CompletedStatus.NOT_DONE);
+
+        when(recordDayRepository.findById(dayNo))
+                .thenReturn(Optional.of(recordDay));
+        when(todoRepository.findByDay_DayNoOrderByCreatedAtAsc(dayNo))
+                .thenReturn(List.of(todo1, todo2));
+
+//        when
+        List<TodoResponseDto> responseDtos = todoService.getGuestTodoOfDay(dayNo, joinCode);
+
+//        then
+        assertThat(responseDtos).hasSize(2);
+        assertThat(responseDtos)
+                .extracting(TodoResponseDto::getTodoContent)
+                .containsExactly("모자 챙기기", "여권 챙기기");
+
+        verify(collabAuthorityService).checkGuest(recordNo, joinCode);
+        verify(todoRepository).findByDay_DayNoOrderByCreatedAtAsc(dayNo);
     }
 
     @Test
@@ -182,7 +216,7 @@ public class TodoServiceTest {
 //        then
         assertThat(responseDto.getTodoContent()).isEqualTo("여권 챙기기");
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).flush();
     }
 
@@ -204,7 +238,7 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.TODO_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(todoRepository, never()).flush();
     }
 
@@ -234,7 +268,7 @@ public class TodoServiceTest {
         assertThat(responseDto.getTodoNo()).isEqualTo(todoNo);
         assertThat(responseDto.getCompletedStatus()).isEqualTo(Todo.CompletedStatus.DONE);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).flush();
     }
 
@@ -256,7 +290,7 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.TODO_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(todoRepository, never()).flush();
     }
 
@@ -281,7 +315,7 @@ public class TodoServiceTest {
         todoService.deleteTodo(userNo, todoNo);
 
 //        then
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).delete(todo);
         verify(todoRepository).flush();
     }
@@ -302,7 +336,7 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.TODO_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(todoRepository, never()).delete(any(Todo.class));
         verify(todoRepository, never()).flush();
     }
@@ -335,7 +369,7 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.TODO_CONFLICT.getMessage());
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(todoRepository).flush();
     }
 

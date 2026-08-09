@@ -5,8 +5,11 @@ import com.project.travel.collab.entity.RoleCode;
 import com.project.travel.collab.repository.CollabRepository;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
+import com.project.travel.guest.entity.CodeActiveStatus;
+import com.project.travel.guest.repository.GuestCodeRepository;
 import com.project.travel.record.entity.Record;
 import com.project.travel.record.entity.TravelType;
+import com.project.travel.record.repository.RecordRepository;
 import com.project.travel.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,8 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Optional;
-
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -25,33 +26,35 @@ import static org.assertj.core.api.Assertions.*;
 public class CollabAuthorityServiceTest {
     @Mock
     private CollabRepository collabRepository;
+    @Mock
+    private RecordRepository recordRepository;
+    @Mock
+    private GuestCodeRepository guestCodeRepository;
 
     @InjectMocks
     private CollabAuthorityService collabAuthorityService;
 
     @Test
     @DisplayName("Owner 권한 확인에 성공한다")
-    void check_authority_owner_success() {
+    void check_member_owner_success() {
 //        given
         Integer recordNo = 1;
         Integer userNo = 1;
 
-        when(collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+        when(recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(
                 recordNo,
-                userNo,
-                RoleCode.OWNER
+                userNo
         )).thenReturn(true);
 
 //        when, then
         assertThatCode(() ->
-                collabAuthorityService.checkOwner(recordNo, userNo))
+                collabAuthorityService.checkMemberOwner(recordNo, userNo))
                 .doesNotThrowAnyException();
 
-        verify(collabRepository)
-                .existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+        verify(recordRepository)
+                .existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(
                         recordNo,
-                        userNo,
-                        RoleCode.OWNER
+                        userNo
                 );
     }
 
@@ -62,36 +65,39 @@ public class CollabAuthorityServiceTest {
         Integer recordNo = 1;
         Integer userNo = 1;
 
-        when(collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+        when(recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(
                 recordNo,
-                userNo,
-                RoleCode.OWNER
+                userNo
         )).thenReturn(false);
 
 //        when, then
         assertThatThrownBy(() ->
-                collabAuthorityService.checkOwner(recordNo, userNo))
+                collabAuthorityService.checkMemberOwner(recordNo, userNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.COLLAB_AUTHORITY_OWNER.getMessage());
     }
 
-    //    Editor 권한 확인 성공 테스트와 동일하다.
     @Test
-    @DisplayName("Owner가 수정 권한을 갖는 데에 성공한다")
-    void check_authority_owner_edit_success() {
+    @DisplayName("Editor 권한 확인에 성공한다")
+    void check_member_editor_success() {
 //        given
         Integer recordNo = 1;
         Integer userNo = 1;
 
-        Collab collab = createCollab(recordNo, userNo, RoleCode.OWNER);
-
-        when(collabRepository.findByRecord_RecordNoAndUser_UserNo(recordNo, userNo))
-                .thenReturn(Optional.of(collab));
+        when(recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo))
+                .thenReturn(false);
+        when(collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(recordNo, userNo, RoleCode.EDITOR))
+                .thenReturn(true);
 
 //        when, then
         assertThatCode(() ->
-                collabAuthorityService.checkEditable(recordNo, userNo))
+                collabAuthorityService.checkMemberEditor(recordNo, userNo))
                 .doesNotThrowAnyException();
+
+        verify(recordRepository)
+                .existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo);
+        verify(collabRepository)
+                .existsByRecord_RecordNoAndUser_UserNoAndRoleCode(recordNo, userNo, RoleCode.EDITOR);
     }
 
     @Test
@@ -101,31 +107,15 @@ public class CollabAuthorityServiceTest {
         Integer recordNo = 1;
         Integer userNo = 1;
 
-        when(collabRepository.findByRecord_RecordNoAndUser_UserNo(recordNo, userNo))
-                .thenReturn(Optional.empty());
+        when(recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo))
+                .thenReturn(false);
+        when(collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+                recordNo, userNo, RoleCode.EDITOR))
+                .thenReturn(false);
 
 //        when, then
         assertThatThrownBy(() ->
-                collabAuthorityService.checkEditable(recordNo, userNo))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.RECORD_ACCESS_DENIED.getMessage());
-    }
-
-    @Test
-    @DisplayName("Viewer는 수정 권한이 없어 예외가 발생한다")
-    void check_authority_viewer_edit_fail() {
-//        given
-        Integer recordNo = 1;
-        Integer userNo = 1;
-
-        Collab collab = createCollab(recordNo, userNo, RoleCode.VIEWER);
-
-        when(collabRepository.findByRecord_RecordNoAndUser_UserNo(recordNo, userNo))
-                .thenReturn(Optional.of(collab));
-
-//        when, then
-        assertThatThrownBy(() ->
-                collabAuthorityService.checkEditable(recordNo, userNo))
+                collabAuthorityService.checkMemberEditor(recordNo, userNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.COLLAB_AUTHORITY_EDITOR.getMessage());
     }
@@ -135,14 +125,14 @@ public class CollabAuthorityServiceTest {
     void check_authority_viewer_success() {
 //        given
         Integer recordNo = 1;
-        Integer userNo = 1;
+        String joinCode = "ABCD1234";
 
-        when(collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, userNo))
+        when(guestCodeRepository.existsByRecord_RecordNoAndJoinCodeAndIsActive(recordNo, joinCode, CodeActiveStatus.ACTIVE))
                 .thenReturn(true);
 
 //        when, then
         assertThatCode(() ->
-                collabAuthorityService.checkViewable(recordNo, userNo))
+                collabAuthorityService.checkGuest(recordNo, joinCode))
                 .doesNotThrowAnyException();
     }
 
@@ -151,14 +141,14 @@ public class CollabAuthorityServiceTest {
     void check_authority_viewer_fail() {
 //        given
         Integer recordNo = 1;
-        Integer userNo = 1;
+        String joinCode = "INVALID";
 
-        when(collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, userNo))
+        when(guestCodeRepository.existsByRecord_RecordNoAndJoinCodeAndIsActive(recordNo, joinCode, CodeActiveStatus.ACTIVE))
                 .thenReturn(false);
 
 //        when, then
         assertThatThrownBy(() ->
-                collabAuthorityService.checkViewable(recordNo, userNo))
+                collabAuthorityService.checkGuest(recordNo, joinCode))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.COLLAB_AUTHORITY_VIEWER.getMessage());
     }

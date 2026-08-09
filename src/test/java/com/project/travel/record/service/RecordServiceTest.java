@@ -61,7 +61,7 @@ class RecordServiceTest {
                 .thenReturn(Optional.empty());
 
 //        when, then
-        assertThatThrownBy(() -> recordService.getRecordDetail(1, 1))
+        assertThatThrownBy(() -> recordService.getUserRecordDetail(1, 1))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
@@ -98,7 +98,6 @@ class RecordServiceTest {
     void create_record_save_as_owner() {
 //        given
         Integer userNo = 1;
-
         User user = createUser();
 
         RecordRequestDto recordRequestDto = createRecordRequest("제주 여행", TravelType.DOMESTIC);
@@ -110,19 +109,13 @@ class RecordServiceTest {
         when(recordRepository.save(any(Record.class)))
                 .thenReturn(savedRecord);
 
-        ArgumentCaptor<Collab> collabArgumentCaptor = ArgumentCaptor.forClass(Collab.class);
-
 //        when
-        recordService.createRecord(userNo, recordRequestDto);
+        RecordResponseDto responseDto = recordService.createRecord(userNo, recordRequestDto);
 
 //        then
-        verify(collabRepository).save(collabArgumentCaptor.capture());
+        assertThat(responseDto.getRecordName()).isEqualTo("제주 여행");
 
-        Collab savedCollab = collabArgumentCaptor.getValue();
-
-        assertThat(savedCollab.getRecord()).isEqualTo(savedRecord);
-        assertThat(savedCollab.getUser()).isEqualTo(user);
-        assertThat(savedCollab.getRoleCode()).isEqualTo(RoleCode.OWNER);
+        verify(recordRepository).save(any(Record.class));
     }
 
     @Test
@@ -136,22 +129,10 @@ class RecordServiceTest {
         Record ownerRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
         Record editorRecord = createRecord(user, 2, "일본 여행", TravelType.OVERSEAS);
 
-        Collab ownerCollab = Collab.builder()
-                .record(ownerRecord)
-                .user(user)
-                .roleCode(RoleCode.OWNER)
-                .build();
-
-        Collab editorCollab = Collab.builder()
-                .record(editorRecord)
-                .user(user)
-                .roleCode(RoleCode.EDITOR)
-                .build();
-
-        when(collabRepository.findAllByUser_UserNoAndRoleCodeInAndRecord_IsDeletedFalse(
+        when(recordRepository.findMyRecords(
                 userNo,
-                List.of(RoleCode.OWNER, RoleCode.EDITOR)
-        )).thenReturn(List.of(ownerCollab, editorCollab));
+                RoleCode.EDITOR
+        )).thenReturn(List.of(ownerRecord, editorRecord));
 
 //        when
         List<RecordResponseDto> responseDtos = recordService.getMyRecords(userNo);
@@ -161,11 +142,13 @@ class RecordServiceTest {
         assertThat(responseDtos)
                 .extracting(RecordResponseDto::getRecordName)
                 .containsExactly("제주 여행", "일본 여행");
+
+        verify(recordRepository).findMyRecords(userNo, RoleCode.EDITOR);
     }
 
     @Test
-    @DisplayName("Record 상세조회에 성공한다")
-    void get_record_detail_success() {
+    @DisplayName("회원 Record 상세조회에 성공한다")
+    void get_user_record_detail_success() {
 //        given
         Integer userNo = 1;
         Integer recordNo = 1;
@@ -182,12 +165,42 @@ class RecordServiceTest {
                 .thenReturn(List.of());
 
 //        when
-        RecordDetailResponseDto detailResponseDto = recordService.getRecordDetail(userNo, recordNo);
+        RecordDetailResponseDto detailResponseDto = recordService.getUserRecordDetail(userNo, recordNo);
 
 //        then
         assertThat(detailResponseDto).isNotNull();
 
-        verify(collabAuthorityService).checkViewable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        verify(scheduleRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo);
+        verify(todoRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
+    }
+
+    @Test
+    @DisplayName("비회원 Record 상세조회에 성공한다")
+    void get_guest_record_detail_success() {
+//        given
+        Integer recordNo = 1;
+        String joinCode = "ABCD1234";
+
+        Record record = getRecord(1, "제주 여행", TravelType.DOMESTIC);
+
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
+                .thenReturn(Optional.of(record));
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
+                .thenReturn(List.of());
+        when(scheduleRepository.findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo))
+                .thenReturn(List.of());
+        when(todoRepository.findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo))
+                .thenReturn(List.of());
+
+//        when
+        RecordDetailResponseDto detailResponseDto = recordService.getGuestRecordDetail(recordNo, joinCode);
+
+//        then
+        assertThat(detailResponseDto).isNotNull();
+
+        verify(collabAuthorityService).checkGuest(recordNo, joinCode);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
         verify(scheduleRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo);
         verify(todoRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
@@ -214,7 +227,7 @@ class RecordServiceTest {
         assertThat(responseDto.getRecordName()).isEqualTo("일본 여행");
         assertThat(responseDto.getTravelType()).isEqualTo(TravelType.OVERSEAS);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     @Test
@@ -235,7 +248,7 @@ class RecordServiceTest {
 //        then
         assertThat(record.isDeleted()).isTrue();
 
-        verify(collabAuthorityService).checkOwner(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberOwner(recordNo, userNo);
     }
 
     private User createUser() {

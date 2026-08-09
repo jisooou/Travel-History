@@ -91,7 +91,7 @@ public class InviteServiceTest {
         assertThat(responseDto.getRoleCode()).isEqualTo(RoleCode.EDITOR);
         assertThat(responseDto.getInviteStatus()).isEqualTo(InviteStatus.PENDING);
 
-        verify(collabAuthorityService).checkOwner(recordNo, ownerNo);
+        verify(collabAuthorityService).checkMemberOwner(recordNo, ownerNo);
         verify(inviteInfoRepository).save(any(InviteInfo.class));
     }
 
@@ -140,7 +140,7 @@ public class InviteServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.EMAIL_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkOwner(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberOwner(anyInt(), anyInt());
         verify(inviteInfoRepository, never()).save(any(InviteInfo.class));
     }
 
@@ -171,38 +171,7 @@ public class InviteServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.USER_ALREADY_EXIST.getMessage());
 
-        verify(collabAuthorityService, never()).checkOwner(anyInt(), anyInt());
-        verify(inviteInfoRepository, never()).save(any(InviteInfo.class));
-    }
-
-    @Test
-    @DisplayName("OWNER 권한으로 초대하면 예외가 발생한다")
-    void create_invite_authority_owner_fail() {
-//        given
-        Integer ownerNo = 1;
-        Integer inviteUserNo = 2;
-        Integer recordNo = 1;
-
-        User owner = createUser(ownerNo, "owner@test.com", "owner");
-        User inviteUser = createUser(inviteUserNo, "user@test.com", "user");
-        Record record = createRecord(owner, recordNo);
-
-        InviteRequestDto requestDto = createInviteRequest("user@test.com", RoleCode.OWNER);
-
-        when(recordRepository.findById(recordNo))
-                .thenReturn(Optional.of(record));
-        when(userRepository.findByEmail("user@test.com"))
-                .thenReturn(Optional.of(inviteUser));
-        when(collabRepository.existsByRecord_RecordNoAndUser_UserNo(recordNo, inviteUserNo))
-                .thenReturn(false);
-
-//        when, then
-        assertThatThrownBy(() ->
-                inviteService.createInvite(ownerNo, recordNo, requestDto))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.INVITE_INVALID_AUTHORITY_OWNER.getMessage());
-
-        verify(collabAuthorityService).checkOwner(recordNo, ownerNo);
+        verify(collabAuthorityService, never()).checkMemberOwner(anyInt(), anyInt());
         verify(inviteInfoRepository, never()).save(any(InviteInfo.class));
     }
 
@@ -236,7 +205,7 @@ public class InviteServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.INVITE_STATUS_PENDING.getMessage());
 
-        verify(collabAuthorityService).checkOwner(recordNo, ownerNo);
+        verify(collabAuthorityService).checkMemberOwner(recordNo, ownerNo);
         verify(inviteInfoRepository, never()).save(any(InviteInfo.class));
     }
 

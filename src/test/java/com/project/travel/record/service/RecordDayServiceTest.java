@@ -79,7 +79,7 @@ public class RecordDayServiceTest {
         assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
         assertThat(responseDto.getDayOrder()).isEqualTo(2);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(recordDayRepository).saveAndFlush(any(RecordDay.class));
     }
 
@@ -123,7 +123,7 @@ public class RecordDayServiceTest {
         assertThat(responseDto.getDayOrder()).isEqualTo(2);
         assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 2));
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(recordDayRepository).saveAndFlush(any(RecordDay.class));
     }
 
@@ -147,13 +147,13 @@ public class RecordDayServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(recordDayRepository, never()).save(any(RecordDay.class));
     }
 
     @Test
-    @DisplayName("RecordDay 조회에 성공한다")
-    void get_record_day_success() {
+    @DisplayName("회원 RecordDay 조회에 성공한다")
+    void get_user_record_day_success() {
 //        given
         Integer userNo = 1;
         Integer recordNo = 1;
@@ -177,7 +177,7 @@ public class RecordDayServiceTest {
                 .thenReturn(List.of(day1, day2));
 
 //        when
-        List<RecordDayResponseDto> responseDtos = recordDayService.getRecordDays(userNo, recordNo);
+        List<RecordDayResponseDto> responseDtos = recordDayService.getUserRecordDays(userNo, recordNo);
 
 //        then
         assertThat(responseDtos).hasSize(2);
@@ -191,7 +191,7 @@ public class RecordDayServiceTest {
                 .extracting(RecordDayResponseDto::getDayOrder)
                 .containsExactly(1, 2);
 
-        verify(collabAuthorityService).checkViewable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
     }
 
@@ -207,12 +207,56 @@ public class RecordDayServiceTest {
 
 //        when, then
         assertThatThrownBy(() ->
-                recordDayService.getRecordDays(userNo, recordNo))
+                recordDayService.getUserRecordDays(userNo, recordNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkViewable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(recordDayRepository, never()).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(anyInt());
+    }
+
+    @Test
+    @DisplayName("비회원 RecordDay 조회에 성공한다")
+    void get_guest_record_day_success() {
+//        given
+        Integer recordNo = 1;
+        String joinCode = "ABCD1234";
+
+        User user = createUser();
+        Record record = createRecord(user, recordNo, "제주 여행", TravelType.DOMESTIC);
+        RecordDay day1 = createRecordDay(
+                record,
+                1,
+                LocalDate.of(2026, 1, 1)
+        );
+        RecordDay day2 = createRecordDay(
+                record,
+                2,
+                LocalDate.of(2026, 1, 2)
+        );
+
+        when(recordRepository.findByRecordNoAndIsDeletedFalse(recordNo))
+                .thenReturn(Optional.of(record));
+        when(recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo))
+                .thenReturn(List.of(day1, day2));
+
+//        when
+        List<RecordDayResponseDto> responseDtos = recordDayService.getGuestRecordDays(recordNo, joinCode);
+
+//        then
+        assertThat(responseDtos).hasSize(2);
+        assertThat(responseDtos)
+                .extracting(RecordDayResponseDto::getTravelDate)
+                .containsExactly(
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 1, 2)
+                );
+        assertThat(responseDtos)
+                .extracting(RecordDayResponseDto::getDayOrder)
+                .containsExactly(1, 2);
+
+        verify(collabAuthorityService).checkGuest(recordNo, joinCode);
+        verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
     }
 
     @Test
@@ -251,7 +295,7 @@ public class RecordDayServiceTest {
         assertThat(responseDto.getTravelDate()).isEqualTo(LocalDate.of(2026, 1, 3));
         assertThat(responseDto.getDayOrder()).isEqualTo(2);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     @Test
@@ -274,7 +318,7 @@ public class RecordDayServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
     }
 
     @Test
@@ -300,7 +344,7 @@ public class RecordDayServiceTest {
         recordDayService.deleteRecordDay(userNo, dayNo);
 
 //        then
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(recordDayRepository).delete(recordDay);
     }
 
@@ -320,7 +364,7 @@ public class RecordDayServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(recordDayRepository, never()).delete(any(RecordDay.class));
     }
 

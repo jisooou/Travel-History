@@ -89,7 +89,7 @@ public class ScheduleServiceTest {
         assertThat(responseDto.getTimeSlot()).isEqualTo(TimeSlot.MORNING);
         assertThat(responseDto.getSortOrder()).isEqualTo(1);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(scheduleRepository).save(any(SchedulePlace.class));
     }
 
@@ -113,13 +113,13 @@ public class ScheduleServiceTest {
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
         verify(placeRepository, never()).findById(anyInt());
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(scheduleRepository, never()).save(any(SchedulePlace.class));
     }
 
     @Test
-    @DisplayName("Schedule 조회에 성공한다")
-    void get_schedule_success() {
+    @DisplayName("회원 Schedule 조회에 성공한다")
+    void get_user_schedule_success() {
 //        given
         Integer userNo = 1;
         Integer recordNo = 1;
@@ -141,7 +141,7 @@ public class ScheduleServiceTest {
                 .thenReturn(List.of(scheduleA, scheduleB));
 
 //        when
-        List<ScheduleResponseDto> responseDtos = scheduleService.getScheduleOfDay(userNo, dayNo);
+        List<ScheduleResponseDto> responseDtos = scheduleService.getUserScheduleOfDay(userNo, dayNo);
 
 //        then
         assertThat(responseDtos).hasSize(2);
@@ -149,7 +149,7 @@ public class ScheduleServiceTest {
                 .extracting(ScheduleResponseDto::getSortOrder)
                 .containsExactly(1, 2);
 
-        verify(collabAuthorityService).checkViewable(recordNo, dayNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(scheduleRepository).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo);
     }
 
@@ -165,12 +165,48 @@ public class ScheduleServiceTest {
 
 //        when, then
         assertThatThrownBy(() ->
-                scheduleService.getScheduleOfDay(userNo, dayNo))
+                scheduleService.getUserScheduleOfDay(userNo, dayNo))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkViewable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(scheduleRepository, never()).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(anyInt());
+    }
+
+    @Test
+    @DisplayName("비회원 Schedule 조회에 성공한다")
+    void get_guest_schedule_success() {
+//        given
+        Integer recordNo = 1;
+        Integer dayNo = 1;
+        String joinCode = "ABCD1234";
+
+        User user = createUser();
+        Record record = createRecord(user, recordNo);
+        RecordDay recordDay = createRecordDay(record, dayNo);
+
+        Place placeA = createPlace(record, 1, "카페A");
+        Place placeB = createPlace(record, 2, "카페B");
+
+        SchedulePlace scheduleA = createSchedule(recordDay, placeA, 1, TimeSlot.MORNING, 1);
+        SchedulePlace scheduleB = createSchedule(recordDay, placeB, 2, TimeSlot.MORNING, 2);
+
+        when(recordDayRepository.findById(dayNo))
+                .thenReturn(Optional.of(recordDay));
+        when(scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo))
+                .thenReturn(List.of(scheduleA, scheduleB));
+
+//        when
+        List<ScheduleResponseDto> responseDtos = scheduleService.getGuestScheduleOfDay(recordNo, joinCode);
+
+//        then
+        assertThat(responseDtos).hasSize(2);
+        assertThat(responseDtos)
+                .extracting(ScheduleResponseDto::getSortOrder)
+                .containsExactly(1, 2);
+
+        verify(collabAuthorityService).checkGuest(recordNo, joinCode);
+        verify(scheduleRepository).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo);
     }
 
     @Test
@@ -207,7 +243,7 @@ public class ScheduleServiceTest {
         assertThat(responseDto.getTimeSlot()).isEqualTo(TimeSlot.AFTERNOON);
         assertThat(responseDto.getSortOrder()).isEqualTo(1);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     @Test
@@ -230,7 +266,7 @@ public class ScheduleServiceTest {
                 .hasMessage(ErrorCode.SCHEDULE_NOT_FOUND.getMessage());
 
         verify(placeRepository, never()).findById(anyInt());
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
     }
 
     @Test
@@ -255,7 +291,7 @@ public class ScheduleServiceTest {
         scheduleService.deleteScheduleOfDay(userNo, scheduleNo);
 
 //        then
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(scheduleRepository).delete(schedule);
     }
 
@@ -275,7 +311,7 @@ public class ScheduleServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.SCHEDULE_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkEditable(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
         verify(scheduleRepository, never()).delete(any(SchedulePlace.class));
     }
 
@@ -329,7 +365,7 @@ public class ScheduleServiceTest {
                 .extracting(ScheduleResponseDto::getScheduleNo)
                 .containsExactly(3, 1, 4, 2);
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(scheduleRepository).findByDayNoAndTimeSlotOrderBySortOrderAscForUpdate(dayNo, TimeSlot.MORNING);
     }
 
@@ -370,7 +406,7 @@ public class ScheduleServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.SCHEDULE_INVALID_REORDER.getMessage());
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     @Test
@@ -410,7 +446,7 @@ public class ScheduleServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.SCHEDULE_INVALID_REORDER.getMessage());
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     @Test
@@ -450,7 +486,7 @@ public class ScheduleServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.SCHEDULE_INVALID_REORDER.getMessage());
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
     }
 
     private User createUser() {

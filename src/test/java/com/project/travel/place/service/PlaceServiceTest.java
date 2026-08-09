@@ -94,7 +94,7 @@ public class PlaceServiceTest {
         assertThat(responseDto.getMapSource()).isEqualTo("KAKAO");
         assertThat(responseDto.getMapPlaceId()).isEqualTo("1234");
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(placeRepository).save(any(Place.class));
     }
 
@@ -151,14 +151,13 @@ public class PlaceServiceTest {
         assertThat(responseDto.getMapSource()).isEqualTo("KAKAO");
         assertThat(responseDto.getMapPlaceId()).isEqualTo("1234");
 
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(placeRepository, never()).save(any(Place.class));
     }
 
-
     @Test
-    @DisplayName("Record의 장소를 조회하는 데에 성공한다")
-    void get_place_of_record_success() {
+    @DisplayName("회원 Record의 장소를 조회하는 데에 성공한다")
+    void get_user_place_of_record_success() {
 //        given
         Integer userNo = 1;
         Integer recordNo = 1;
@@ -195,7 +194,7 @@ public class PlaceServiceTest {
                 .thenReturn(List.of(placeA, placeB));
 
 //        when
-        List<PlaceResponseDto> responseDtos = placeService.getPlaceOfRecord(userNo, recordNo);
+        List<PlaceResponseDto> responseDtos = placeService.getUserPlaceOfRecord(userNo, recordNo);
 
 //        then
         assertThat(responseDtos).hasSize(2);
@@ -203,7 +202,59 @@ public class PlaceServiceTest {
                 .extracting(PlaceResponseDto::getPlaceName)
                 .containsExactly("카페A", "카페B");
 
-        verify(collabAuthorityService).checkViewable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(placeRepository).findByRecord_RecordNo(recordNo);
+    }
+
+    @Test
+    @DisplayName("비회원 Record의 장소를 조회하는 데에 성공한다")
+    void get_guest_place_of_record_success() {
+//        given
+        Integer userNo = 1;
+        Integer recordNo = 1;
+        String joinCode = "ABCD1234";
+
+        User user = createUser(userNo);
+        Record record = createRecord(user, recordNo);
+
+        Place placeA = createPlace(
+                record,
+                1,
+                "카페A",
+                "용인",
+                new BigDecimal("37.566610"),
+                new BigDecimal("126.978403"),
+                "KAKAO",
+                "1234",
+                null
+        );
+        Place placeB = createPlace(
+                record,
+                2,
+                "카페B",
+                "용인",
+                new BigDecimal("37.457110"),
+                new BigDecimal("126.978403"),
+                "KAKAO",
+                "5678",
+                null
+        );
+
+        when(recordRepository.findById(recordNo))
+                .thenReturn(Optional.of(record));
+        when(placeRepository.findByRecord_RecordNo(recordNo))
+                .thenReturn(List.of(placeA, placeB));
+
+//        when
+        List<PlaceResponseDto> responseDtos = placeService.getGuestPlaceOfRecord(recordNo, joinCode);
+
+//        then
+        assertThat(responseDtos).hasSize(2);
+        assertThat(responseDtos)
+                .extracting(PlaceResponseDto::getPlaceName)
+                .containsExactly("카페A", "카페B");
+
+        verify(collabAuthorityService).checkGuest(recordNo, joinCode);
         verify(placeRepository).findByRecord_RecordNo(recordNo);
     }
 
@@ -237,7 +288,7 @@ public class PlaceServiceTest {
         placeService.deletePlace(userNo, placeNo);
 
 //        then
-        verify(collabAuthorityService).checkEditable(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
         verify(placeRepository).delete(place);
     }
 

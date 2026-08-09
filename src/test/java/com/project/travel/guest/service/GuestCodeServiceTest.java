@@ -80,7 +80,7 @@ public class GuestCodeServiceTest {
         assertThat(responseDto.getCodeActiveStatus()).isEqualTo(CodeActiveStatus.ACTIVE);
         assertThat(oldCode.getIsActive()).isEqualTo(CodeActiveStatus.INACTIVE);
 
-        verify(collabAuthorityService).checkOwner(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberOwner(recordNo, userNo);
         verify(guestCodeRepository).save(any(GuestCode.class));
     }
 
@@ -100,7 +100,7 @@ public class GuestCodeServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService).checkOwner(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberOwner(recordNo, userNo);
         verify(guestCodeRepository, never()).save(any(GuestCode.class));
     }
 
