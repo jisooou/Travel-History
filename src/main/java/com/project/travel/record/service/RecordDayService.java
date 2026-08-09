@@ -30,7 +30,7 @@ public class RecordDayService {
     @Transactional
     public RecordDayResponseDto createRecordDay(Integer userNo, Integer recordNo, @Valid RecordDayRequestDto requestDto) {
         Record record = getAccessRecord(recordNo);
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         RecordDay recordDay = RecordDay.builder()
                 .record(record)
@@ -53,9 +53,18 @@ public class RecordDayService {
         );
     }
 
-    public List<RecordDayResponseDto> getRecordDays(Integer userNo, Integer recordNo) {
+    public List<RecordDayResponseDto> getUserRecordDays(Integer userNo, Integer recordNo) {
         getAccessRecord(recordNo);
-        collabAuthorityService.checkViewable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+
+        return getDayOrderResponse(recordDays);
+    }
+
+    public List<RecordDayResponseDto> getGuestRecordDays(Integer recordNo, String joinCode) {
+        getAccessRecord(recordNo);
+        collabAuthorityService.checkGuest(recordNo, joinCode);
 
         List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
 
@@ -67,7 +76,7 @@ public class RecordDayService {
         RecordDay recordDay = getAccessRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
         try {
             recordDay.update(requestDto.getTravelDate());
             recordDayRepository.flush();
@@ -91,7 +100,7 @@ public class RecordDayService {
         RecordDay recordDay = getAccessRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         recordDayRepository.delete(recordDay);
     }

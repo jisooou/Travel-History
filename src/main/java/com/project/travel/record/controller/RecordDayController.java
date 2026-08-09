@@ -29,12 +29,22 @@ public class RecordDayController {
     }
 
     //    특정 여행 기록의 날짜 조회
+    //    회원
     @GetMapping("/records/{recordNo}")
-    public ApiResponse<List<RecordDayResponseDto>> getRecordDays(
+    public ApiResponse<List<RecordDayResponseDto>> getUserRecordDays(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer recordNo
     ) {
-        return ApiResponse.success(recordDayService.getRecordDays(userDetails.getUserNo(), recordNo));
+        return ApiResponse.success(recordDayService.getUserRecordDays(userDetails.getUserNo(), recordNo));
+    }
+
+    //    비회원
+    @GetMapping("/guest/records/{recordNo}")
+    public ApiResponse<List<RecordDayResponseDto>> getGuestRecordDays(
+            @PathVariable Integer recordNo,
+            @RequestParam String joinCode
+    ) {
+        return ApiResponse.success(recordDayService.getGuestRecordDays(recordNo, joinCode));
     }
 
     //    특정 여행 기록의 날짜 수정 (recordNo, dayNo)

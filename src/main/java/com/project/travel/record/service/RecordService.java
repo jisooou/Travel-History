@@ -53,32 +53,48 @@ public class RecordService {
                 .build();
         Record savedRecord = recordRepository.save(record);
 
-//        Record를 생성한 사람 : Owner 지정
-        Collab ownerCollab = Collab.builder()
-                .record(savedRecord)
-                .user(user)
-                .roleCode(RoleCode.OWNER)
-                .build();
-        collabRepository.save(ownerCollab);
         return RecordResponseDto.from(savedRecord);
     }
 
     //    본인이 만든 Record + Editor로 초대받은 Record (Owner + Editor)
     public List<RecordResponseDto> getMyRecords(Integer userNo) {
-        return collabRepository.findAllByUser_UserNoAndRoleCodeInAndRecord_IsDeletedFalse(
-                        userNo,
-                        List.of(RoleCode.OWNER, RoleCode.EDITOR)
-                )
+        return recordRepository.findMyRecords(userNo, RoleCode.EDITOR)
                 .stream()
-                .map(Collab::getRecord)
                 .map(RecordResponseDto::from)
                 .toList();
     }
 
-    public RecordDetailResponseDto getRecordDetail(Integer userNo, Integer recordNo) {
+    public RecordDetailResponseDto getUserRecordDetail(Integer userNo, Integer recordNo) {
         Record record = getAccessRecord(recordNo);
 //        OWNER, EDITOR, VIEWR 모두 상세 조회가 가능하다.
-        collabAuthorityService.checkViewable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+
+        List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
+        List<RecordDayResponseDto> days = getDayOrderResponse(recordDays);
+
+        List<ScheduleResponseDto> schedules = scheduleRepository
+                .findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo)
+                .stream()
+                .map(ScheduleResponseDto::from)
+                .toList();
+
+        List<TodoResponseDto> todos = todoRepository
+                .findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo)
+                .stream()
+                .map(TodoResponseDto::from)
+                .toList();
+
+        return RecordDetailResponseDto.of(
+                record,
+                days,
+                schedules,
+                todos
+        );
+    }
+
+    public RecordDetailResponseDto getGuestRecordDetail(Integer recordNo, String joinCode) {
+        Record record = getAccessRecord(recordNo);
+        collabAuthorityService.checkGuest(recordNo, joinCode);
 
         List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
         List<RecordDayResponseDto> days = getDayOrderResponse(recordDays);
@@ -106,7 +122,7 @@ public class RecordService {
     @Transactional
     public RecordResponseDto updateRecord(Integer userNo, Integer recordNo, @Valid RecordRequestDto requestDto) {
         Record record = getAccessRecord(recordNo);
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         record.update(requestDto.getRecordName(), requestDto.getTravelType());
         return RecordResponseDto.from(record);
@@ -115,7 +131,7 @@ public class RecordService {
     @Transactional
     public void deleteRecord(Integer userNo, Integer recordNo) {
         Record record = getAccessRecord(recordNo);
-        collabAuthorityService.checkOwner(recordNo, userNo);
+        collabAuthorityService.checkMemberOwner(recordNo, userNo);
 
         record.delete();
     }

@@ -38,13 +38,23 @@ public class RecordController {
         return ApiResponse.success(recordService.getMyRecords(userDetails.getUserNo()));
     }
 
+    //    회원용
     //    여행 기록 상세 조회 (날짜, 일정, todo)
     @GetMapping("/{recordNo}")
-    public ApiResponse<RecordDetailResponseDto> getRecordDetail(
+    public ApiResponse<RecordDetailResponseDto> getUserRecordDetail(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer recordNo
     ) {
-        return ApiResponse.success(recordService.getRecordDetail(userDetails.getUserNo(), recordNo));
+        return ApiResponse.success(recordService.getUserRecordDetail(userDetails.getUserNo(), recordNo));
+    }
+
+    //    비회원용
+    @GetMapping("/guest/{recordNo}")
+    public ApiResponse<RecordDetailResponseDto> getGuestRecordDetail(
+            @PathVariable Integer recordNo,
+            @RequestParam String joinCode
+    ) {
+        return ApiResponse.success(recordService.getGuestRecordDetail(recordNo, joinCode));
     }
 
     //  여행 기록(목록에 표시되는) 수정
