@@ -62,7 +62,7 @@ public class AuthService {
             tokenRedisService.deleteRefreshToken(userNo);
             throw new CustomException(ErrorCode.DETECTED_DANGER_REFRESH_TOKEN);
         }
-        User user = userRepository.findById(userNo)
+        User user = userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         tokenRedisService.deleteRefreshToken(userNo);

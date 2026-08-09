@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     throw new CustomException(ErrorCode.LOGOUT_INVALID_TOKEN);
                 }
                 Integer userNo = jwtProvider.getUserNo(accessToken);
-                User user = userRepository.findById(userNo)
+                User user = userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE)
                         .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
                 List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
