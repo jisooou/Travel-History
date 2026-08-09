@@ -9,7 +9,6 @@ import com.project.travel.guest.entity.GuestCode;
 import com.project.travel.guest.repository.GuestCodeRepository;
 import com.project.travel.record.entity.Record;
 import com.project.travel.record.repository.RecordRepository;
-import com.project.travel.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +32,7 @@ public class GuestCodeService {
     @Transactional
     public GuestCodeResponseDto createJoinCode(Integer userNo, Integer recordNo) {
 //        OWNER가 맞는지 확인한다. : CollabAuthorityService에서 확인해 준다.
-        collabAuthorityService.checkOwner(recordNo, userNo);
+        collabAuthorityService.checkMemberOwner(recordNo, userNo);
 //        없는 recordNo는 아닌지 확인한다.
         Record record = recordRepository.findById(recordNo)
                 .orElseThrow(() -> new CustomException(ErrorCode.RECORD_NOT_FOUND));

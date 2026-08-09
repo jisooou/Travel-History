@@ -27,12 +27,22 @@ public class PlaceController {
         return ApiResponse.success(placeService.addPlaceToRecord(userDetails.getUserNo(), recordNo, requestDto));
     }
 
+    //    회원
     @GetMapping("/records/{recordNo}")
-    public ApiResponse<List<PlaceResponseDto>> getPlaceOfRecord(
+    public ApiResponse<List<PlaceResponseDto>> getUserPlaceOfRecord(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer recordNo
     ) {
-        return ApiResponse.success(placeService.getPlaceOfRecord(userDetails.getUserNo(), recordNo));
+        return ApiResponse.success(placeService.getUserPlaceOfRecord(userDetails.getUserNo(), recordNo));
+    }
+
+    //    비회원
+    @GetMapping("/guest/records/{recordNo}")
+    public ApiResponse<List<PlaceResponseDto>> getGuestPlaceOfRecord(
+            @PathVariable Integer recordNo,
+            @RequestParam String joinCode
+    ) {
+        return ApiResponse.success(placeService.getGuestPlaceOfRecord(recordNo, joinCode));
     }
 
     @DeleteMapping("/{placeNo}")

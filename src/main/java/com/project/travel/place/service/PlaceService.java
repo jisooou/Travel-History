@@ -27,7 +27,7 @@ public class PlaceService {
     @Transactional
     public PlaceResponseDto addPlaceToRecord(Integer userNo, Integer recordNo, @Valid PlaceRequestDto requestDto) {
         Record record = getAccessRecord(recordNo);
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         Place place = placeRepository
                 .findByRecord_RecordNoAndMapSourceAndMapPlaceId(
@@ -51,9 +51,19 @@ public class PlaceService {
         return PlaceResponseDto.from(place);
     }
 
-    public List<PlaceResponseDto> getPlaceOfRecord(Integer userNo, Integer recordNo) {
+    public List<PlaceResponseDto> getUserPlaceOfRecord(Integer userNo, Integer recordNo) {
         getAccessRecord(recordNo);
-        collabAuthorityService.checkViewable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+
+        return placeRepository.findByRecord_RecordNo(recordNo)
+                .stream()
+                .map(PlaceResponseDto::from)
+                .toList();
+    }
+
+    public List<PlaceResponseDto> getGuestPlaceOfRecord(Integer recordNo, String joinCode) {
+        getAccessRecord(recordNo);
+        collabAuthorityService.checkGuest(recordNo, joinCode);
 
         return placeRepository.findByRecord_RecordNo(recordNo)
                 .stream()
@@ -66,7 +76,7 @@ public class PlaceService {
         Place place = getAccessPlace(placeNo);
         Integer recordNo = place.getRecord().getRecordNo();
 
-        collabAuthorityService.checkEditable(recordNo, userNo);
+        collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
         placeRepository.delete(place);
     }
