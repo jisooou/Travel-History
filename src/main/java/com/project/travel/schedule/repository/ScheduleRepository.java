@@ -15,6 +15,7 @@ public interface ScheduleRepository extends JpaRepository<SchedulePlace, Integer
     @EntityGraph(attributePaths = "place")
     List<SchedulePlace> findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(Integer recordNo);
 
+    @EntityGraph(attributePaths = "place")
     List<SchedulePlace> findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(Integer dayNo);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
