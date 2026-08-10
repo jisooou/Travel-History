@@ -39,7 +39,12 @@ public class SecurityConfig {
                                         "/api/v1/users/signup/email/send",
                                         "/api/v1/users/signup/email/verify",
                                         "/api/v1/auth/login",
-                                        "/api/v1/auth/reissue"
+                                        "/api/v1/auth/reissue",
+                                        "/api/v1/place/guest/**",
+                                        "/api/v1/record-days/guest/**",
+                                        "/api/v1/record/guest/**",
+                                        "/api/v1/todo/guest/**",
+                                        "/api/v1/schedule/guest/**"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 )
