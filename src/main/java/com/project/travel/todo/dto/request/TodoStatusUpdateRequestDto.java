@@ -7,8 +7,5 @@ import lombok.Getter;
 @Getter
 public class TodoStatusUpdateRequestDto {
     @NotNull
-    private Integer todoNo;
-
-    @NotNull
     private Todo.CompletedStatus completedStatus;
 }
