@@ -56,9 +56,6 @@ public class SchedulePlace {
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "IS_DELETED", nullable = false)
-    private boolean isDeleted = false;
-
     @Builder
     public SchedulePlace(RecordDay day, Place place, TimeSlot timeSlot, Integer sortOrder) {
         this.day = day;
