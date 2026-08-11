@@ -3,7 +3,6 @@ package com.project.travel.schedule.entity;
 import com.project.travel.place.entity.Place;
 import com.project.travel.record.entity.RecordDay;
 import com.project.travel.record.entity.TimeSlot;
-import com.project.travel.schedule.dto.request.ScheduleRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -75,9 +74,10 @@ public class SchedulePlace {
     }
 
     //    책임1 : Schedule update
-    public void update(Place place, TimeSlot timeSlot) {
+    public void update(Place place, TimeSlot timeSlot, Integer sortOrder) {
         this.place = place;
         this.timeSlot = timeSlot;
+        this.sortOrder = sortOrder;
     }
 
     //    Schedule 재정렬을 위해 sortOrder만 변경

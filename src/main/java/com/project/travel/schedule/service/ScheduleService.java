@@ -84,7 +84,7 @@ public class ScheduleService {
         Integer recordNo = schedulePlace.getDay().getRecord().getRecordNo();
         collabAuthorityService.checkMemberEditor(recordNo, userNo);
 
-        schedulePlace.update(place, requestDto.getTimeSlot());
+        schedulePlace.update(place, requestDto.getTimeSlot(), requestDto.getSortOrder());
         return ScheduleResponseDto.from(schedulePlace);
     }
 
