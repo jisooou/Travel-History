@@ -16,11 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
         name = "invite_info",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_record_email",
-                        columnNames = {"RECORD_NO", "INVITE_EMAIL"}
-                )
+        indexes = {
+                @Index(name = "idx_invite_record", columnList = "RECORD_NO")
         }
 )
 public class InviteInfo {
