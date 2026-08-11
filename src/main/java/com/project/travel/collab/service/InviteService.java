@@ -5,7 +5,6 @@ import com.project.travel.collab.dto.response.InviteResponseDto;
 import com.project.travel.collab.entity.Collab;
 import com.project.travel.collab.entity.InviteInfo;
 import com.project.travel.collab.entity.InviteStatus;
-import com.project.travel.collab.entity.RoleCode;
 import com.project.travel.collab.repository.CollabRepository;
 import com.project.travel.collab.repository.InviteInfoRepository;
 import com.project.travel.global.exception.CustomException;
@@ -64,8 +63,7 @@ public class InviteService {
 
     @Transactional
     public InviteResponseDto acceptInvite(Integer userNo, Integer inviteNo) {
-        User user = userRepository.findById(userNo)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.getReferenceById(userNo);
         InviteInfo inviteInfo = inviteInfoRepository.findByInviteNoAndStatus(inviteNo, InviteStatus.PENDING)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT));
         if (!inviteInfo.getInviteEmail().equals(user.getEmail())) {
@@ -91,8 +89,7 @@ public class InviteService {
 
     @Transactional
     public InviteResponseDto rejectInvite(Integer userNo, Integer inviteNo) {
-        User user = userRepository.findById(userNo)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.getReferenceById(userNo);
         InviteInfo inviteInfo = inviteInfoRepository.findByInviteNoAndStatus(inviteNo, InviteStatus.PENDING)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITE_STATUS_NOT_FOUND_ACCEPT_AND_REJECT));
         if (!inviteInfo.getInviteEmail().equals(user.getEmail())) {
