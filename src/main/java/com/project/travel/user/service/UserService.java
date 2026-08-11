@@ -48,8 +48,7 @@ public class UserService {
 
     @Transactional
     public void signOut(Integer userNo) {
-        User user = userRepository.findById(userNo)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.getReferenceById(userNo);
 
         if (user.getIsActive() == User.ActiveStatus.INACTIVE) {
             throw new CustomException(ErrorCode.USER_STATUS_INACTIVE);
