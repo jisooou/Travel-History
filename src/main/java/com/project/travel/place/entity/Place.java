@@ -46,10 +46,10 @@ public class Place {
     @Column(name = "PLACE_ADDRESS", length = 255)
     private String placeAddress;
 
-    @Column(name = "LATITUDE", precision = 10, scale = 8, nullable = false)
+    @Column(name = "LATITUDE", precision = 11, scale = 8, nullable = false)
     private BigDecimal latitude;
 
-    @Column(name = "LONGITUDE", precision = 10, scale = 8, nullable = false)
+    @Column(name = "LONGITUDE", precision = 11, scale = 8, nullable = false)
     private BigDecimal longitude;
 
     @Column(name = "MAP_SOURCE", length = 30, nullable = false)
