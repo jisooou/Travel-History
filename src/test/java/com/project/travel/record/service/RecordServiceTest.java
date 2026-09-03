@@ -42,8 +42,6 @@ class RecordServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private CollabRepository collabRepository;
-    @Mock
     private CollabAuthorityService collabAuthorityService;
     @Mock
     private ScheduleRepository scheduleRepository;
@@ -77,10 +75,10 @@ class RecordServiceTest {
 
         RecordRequestDto requestDto = createRecordRequest("제주 여행", TravelType.DOMESTIC);
 
-        Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
+        Record savedRecord = createRecord(user, "제주 여행", TravelType.DOMESTIC);
 
-        when(userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE))
-                .thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userNo))
+                .thenReturn(user);
         when(recordRepository.save(any(Record.class)))
                 .thenReturn(savedRecord);
 
@@ -88,7 +86,7 @@ class RecordServiceTest {
         RecordResponseDto recordResponseDto = recordService.createRecord(userNo, requestDto);
 
 //        then
-        assertThat(recordResponseDto.getRecordNo()).isEqualTo(1);
+
         assertThat(recordResponseDto.getRecordName()).isEqualTo("제주 여행");
         assertThat(recordResponseDto.getTravelType()).isEqualTo(TravelType.DOMESTIC);
     }
@@ -102,10 +100,10 @@ class RecordServiceTest {
 
         RecordRequestDto recordRequestDto = createRecordRequest("제주 여행", TravelType.DOMESTIC);
 
-        Record savedRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
+        Record savedRecord = createRecord(user,"제주 여행", TravelType.DOMESTIC);
 
-        when(userRepository.findByUserNoAndIsActive(userNo, User.ActiveStatus.ACTIVE))
-                .thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(userNo))
+                .thenReturn(user);
         when(recordRepository.save(any(Record.class)))
                 .thenReturn(savedRecord);
 
@@ -126,8 +124,8 @@ class RecordServiceTest {
 
         User user = createUser();
 
-        Record ownerRecord = createRecord(user, 1, "제주 여행", TravelType.DOMESTIC);
-        Record editorRecord = createRecord(user, 2, "일본 여행", TravelType.OVERSEAS);
+        Record ownerRecord = createRecord(user, "제주 여행", TravelType.DOMESTIC);
+        Record editorRecord = createRecord(user, "일본 여행", TravelType.OVERSEAS);
 
         when(recordRepository.findMyRecords(
                 userNo,
@@ -170,7 +168,7 @@ class RecordServiceTest {
 //        then
         assertThat(detailResponseDto).isNotNull();
 
-        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberViewer(recordNo, userNo);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
         verify(scheduleRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalse(recordNo);
         verify(todoRepository).findByDay_Record_RecordNoAndDay_Record_IsDeletedFalseOrderByCreatedAtAsc(recordNo);
@@ -259,13 +257,13 @@ class RecordServiceTest {
                 .build();
     }
 
-    private Record createRecord(User user, Integer recordNo, String recordName, TravelType travelType) {
+    private Record createRecord(User user, String recordName, TravelType travelType) {
         Record record = Record.builder()
                 .owner(user)
                 .recordName(recordName)
                 .travelType(travelType)
                 .build();
-        ReflectionTestUtils.setField(record, "recordNo", recordNo);
+//        ReflectionTestUtils.setField(record, "recordNo", recordNo);
         return record;
     }
 

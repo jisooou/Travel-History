@@ -191,7 +191,7 @@ public class RecordDayServiceTest {
                 .extracting(RecordDayResponseDto::getDayOrder)
                 .containsExactly(1, 2);
 
-        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberViewer(recordNo, userNo);
         verify(recordDayRepository).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
     }
 
@@ -211,7 +211,7 @@ public class RecordDayServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberViewer(anyInt(), anyInt());
         verify(recordDayRepository, never()).findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(anyInt());
     }
 

@@ -149,7 +149,7 @@ public class ScheduleServiceTest {
                 .extracting(ScheduleResponseDto::getSortOrder)
                 .containsExactly(1, 2);
 
-        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberViewer(recordNo, userNo);
         verify(scheduleRepository).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo);
     }
 
@@ -169,7 +169,7 @@ public class ScheduleServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberViewer(anyInt(), anyInt());
         verify(scheduleRepository, never()).findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(anyInt());
     }
 

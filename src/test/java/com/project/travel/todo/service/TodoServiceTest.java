@@ -133,7 +133,7 @@ public class TodoServiceTest {
                 .extracting(TodoResponseDto::getTodoContent)
                 .containsExactly("모자 챙기기", "여권 챙기기");
 
-        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberViewer(recordNo, userNo);
         verify(todoRepository).findByDay_DayNoOrderByCreatedAtAsc(dayNo);
     }
 
@@ -153,7 +153,7 @@ public class TodoServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.RECORD_DAY_NOT_FOUND.getMessage());
 
-        verify(collabAuthorityService, never()).checkMemberEditor(anyInt(), anyInt());
+        verify(collabAuthorityService, never()).checkMemberViewer(anyInt(), anyInt());
         verify(todoRepository, never()).findByDay_DayNoOrderByCreatedAtAsc(anyInt());
     }
 
@@ -256,7 +256,7 @@ public class TodoServiceTest {
         RecordDay recordDay = createRecordDay(record, dayNo);
         Todo todo = createTodo(todoNo, recordDay, user, "여권 챙기기", Todo.CompletedStatus.NOT_DONE);
 
-        TodoStatusUpdateRequestDto requestDto = createTodoStatusUpdateRequest(todoNo, Todo.CompletedStatus.DONE);
+        TodoStatusUpdateRequestDto requestDto = createTodoStatusUpdateRequest(Todo.CompletedStatus.DONE);
 
         when(todoRepository.findById(todoNo))
                 .thenReturn(Optional.of(todo));
@@ -279,7 +279,7 @@ public class TodoServiceTest {
         Integer userNo = 1;
         Integer todoNo = 999;
 
-        TodoStatusUpdateRequestDto requestDto = createTodoStatusUpdateRequest(todoNo, Todo.CompletedStatus.DONE);
+        TodoStatusUpdateRequestDto requestDto = createTodoStatusUpdateRequest(Todo.CompletedStatus.DONE);
 
         when(todoRepository.findById(todoNo))
                 .thenReturn(Optional.empty());
@@ -426,10 +426,9 @@ public class TodoServiceTest {
         return requestDto;
     }
 
-    private TodoStatusUpdateRequestDto createTodoStatusUpdateRequest(Integer todoNo, Todo.CompletedStatus completedStatus) {
+    private TodoStatusUpdateRequestDto createTodoStatusUpdateRequest(Todo.CompletedStatus completedStatus) {
         TodoStatusUpdateRequestDto requestDto = new TodoStatusUpdateRequestDto();
 
-        ReflectionTestUtils.setField(requestDto, "todoNo", todoNo);
         ReflectionTestUtils.setField(requestDto, "completedStatus", completedStatus);
         return requestDto;
     }

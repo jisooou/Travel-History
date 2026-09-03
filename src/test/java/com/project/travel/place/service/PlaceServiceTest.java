@@ -202,7 +202,7 @@ public class PlaceServiceTest {
                 .extracting(PlaceResponseDto::getPlaceName)
                 .containsExactly("카페A", "카페B");
 
-        verify(collabAuthorityService).checkMemberEditor(recordNo, userNo);
+        verify(collabAuthorityService).checkMemberViewer(recordNo, userNo);
         verify(placeRepository).findByRecord_RecordNo(recordNo);
     }
 
