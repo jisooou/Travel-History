@@ -38,6 +38,26 @@ public class CollabAuthorityService {
         }
     }
 
+    public void checkMemberViewer(Integer recordNo, Integer userNo) {
+        boolean isOwner = recordRepository.existsByRecordNoAndOwner_UserNoAndIsDeletedFalse(recordNo, userNo);
+        if (isOwner) {
+            return;
+        }
+        boolean isEditor = collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+                recordNo, userNo, RoleCode.EDITOR
+        );
+        if (isEditor) {
+            return;
+        }
+
+        boolean isViewer = collabRepository.existsByRecord_RecordNoAndUser_UserNoAndRoleCode(
+                recordNo, userNo, RoleCode.VIEWER
+        );
+        if (!isViewer) {
+            throw new CustomException(ErrorCode.COLLAB_AUTHORITY_VIEWER);
+        }
+    }
+
     public void checkGuest(Integer recordNo, String joinCode) {
         boolean isViewer = guestCodeRepository.existsByRecord_RecordNoAndJoinCodeAndIsActive(
                 recordNo, joinCode, CodeActiveStatus.ACTIVE
