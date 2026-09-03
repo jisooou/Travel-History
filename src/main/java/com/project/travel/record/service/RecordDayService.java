@@ -55,7 +55,7 @@ public class RecordDayService {
 
     public List<RecordDayResponseDto> getUserRecordDays(Integer userNo, Integer recordNo) {
         getAccessRecord(recordNo);
-        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+        collabAuthorityService.checkMemberViewer(recordNo, userNo);
 
         List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
 

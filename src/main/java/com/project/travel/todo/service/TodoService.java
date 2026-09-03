@@ -56,7 +56,7 @@ public class TodoService {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+        collabAuthorityService.checkMemberViewer(recordNo, userNo);
 
         return todoRepository.findByDay_DayNoOrderByCreatedAtAsc(dayNo)
                 .stream()

@@ -1,8 +1,6 @@
 package com.project.travel.record.service;
 
-import com.project.travel.collab.entity.Collab;
 import com.project.travel.collab.entity.RoleCode;
-import com.project.travel.collab.repository.CollabRepository;
 import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
@@ -35,7 +33,6 @@ public class RecordService {
     private final RecordRepository recordRepository;
     private final RecordDayRepository recordDayRepository;
     private final UserRepository userRepository;
-    private final CollabRepository collabRepository;
     private final CollabAuthorityService collabAuthorityService;
     private final ScheduleRepository scheduleRepository;
     private final TodoRepository todoRepository;
@@ -66,7 +63,7 @@ public class RecordService {
     public RecordDetailResponseDto getUserRecordDetail(Integer userNo, Integer recordNo) {
         Record record = getAccessRecord(recordNo);
 //        OWNER, EDITOR, VIEWR 모두 상세 조회가 가능하다.
-        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+        collabAuthorityService.checkMemberViewer(recordNo, userNo);
 
         List<RecordDay> recordDays = recordDayRepository.findByRecord_RecordNoAndRecord_IsDeletedFalseOrderByTravelDateAsc(recordNo);
         List<RecordDayResponseDto> days = getDayOrderResponse(recordDays);

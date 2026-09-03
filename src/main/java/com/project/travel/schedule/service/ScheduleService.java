@@ -55,7 +55,7 @@ public class ScheduleService {
         RecordDay recordDay = getRecordDay(dayNo);
         Integer recordNo = recordDay.getRecord().getRecordNo();
 
-        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+        collabAuthorityService.checkMemberViewer(recordNo, userNo);
 
         return scheduleRepository.findByDay_DayNoOrderByTimeSlotAscSortOrderAsc(dayNo)
                 .stream()

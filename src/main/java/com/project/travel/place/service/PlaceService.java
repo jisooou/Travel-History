@@ -53,7 +53,7 @@ public class PlaceService {
 
     public List<PlaceResponseDto> getUserPlaceOfRecord(Integer userNo, Integer recordNo) {
         getAccessRecord(recordNo);
-        collabAuthorityService.checkMemberEditor(recordNo, userNo);
+        collabAuthorityService.checkMemberViewer(recordNo, userNo);
 
         return placeRepository.findByRecord_RecordNo(recordNo)
                 .stream()
