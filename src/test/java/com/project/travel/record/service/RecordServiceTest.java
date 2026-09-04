@@ -1,8 +1,6 @@
 package com.project.travel.record.service;
 
-import com.project.travel.collab.entity.Collab;
 import com.project.travel.collab.entity.RoleCode;
-import com.project.travel.collab.repository.CollabRepository;
 import com.project.travel.collab.service.CollabAuthorityService;
 import com.project.travel.global.exception.CustomException;
 import com.project.travel.global.exception.ErrorCode;
@@ -20,7 +18,6 @@ import com.project.travel.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
